@@ -10,7 +10,7 @@ This repository is meant to live on GitHub and be cloned whenever you start a ne
 - `CLAUDE.md` and `GEMINI.md` as compatibility adapters.
 - A `docs/` knowledge base that agents use before and after coding.
 - A reusable `skills/` bundle for planning, debugging, TDD, UI work, skill discovery, and graph-based codebase analysis.
-- Optional project profiles, starting with `ios-swiftui`, distilled from a production iOS app setup and feature-based source structure.
+- Optional project profiles: `ios-swiftui` and `nextjs-supabase`.
 - A conservative installer that does not overwrite existing files unless `--force` is passed.
 
 ## Install In A Project
@@ -31,6 +31,12 @@ Install with the iOS/SwiftUI profile:
 
 ```bash
 ./bin/install.sh /absolute/path/to/project --profile ios-swiftui
+```
+
+Install with the Next.js/Supabase profile:
+
+```bash
+./bin/install.sh /absolute/path/to/project --profile nextjs-supabase
 ```
 
 Overwrite existing workflow-managed files:
@@ -57,10 +63,10 @@ Create a GitHub repository for this folder, then from any machine:
 
 ```bash
 git clone git@github.com:<your-user>/global-agent-workflow.git ~/.global-agent-workflow
-~/.global-agent-workflow/bin/install.sh /path/to/new-project --profile ios-swiftui
+~/.global-agent-workflow/bin/install.sh /path/to/new-project --profile nextjs-supabase
 ```
 
-For non-iOS projects, omit `--profile` and customize the generated `docs/` files for the stack.
+For other project types, omit `--profile` and customize the generated `docs/` files for the stack.
 
 ## Repository Layout
 
