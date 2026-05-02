@@ -18,9 +18,10 @@ Before changing code:
 1. Identify the requested outcome and the smallest verifiable success criteria.
 2. Check `docs/INDEX.md` if it exists and read only the rows relevant to the task.
 3. Read `docs/agent-workflow.md` when the task is about process, setup, handoff, migration, or agent behavior.
-4. Check `docs/coding-standards.md` if it exists and read only relevant sections.
-5. Check `skills/` for matching local skills. Use the runtime's native skill tool if available; otherwise read the matching `skills/<name>/SKILL.md`.
-6. State which docs and skills you used before making changes.
+4. Check `docs/decision-log.md` for relevant prior decisions.
+5. Check `docs/coding-standards.md` if it exists and read only relevant sections.
+6. Check `skills/` for matching local process skills. Use the runtime's native skill tool if available; otherwise read the matching `skills/<name>/SKILL.md`.
+7. State which docs and skills you used before making changes.
 
 If the task is documentation-only or configuration-only, adapt the same process to those files.
 
@@ -45,7 +46,7 @@ For bugs or failing tests, investigate root cause before proposing a fix. Reprod
 
 For features or behavior changes, prefer test-first work. Write the smallest meaningful failing test, confirm it fails for the expected reason, implement the minimal code, then verify the test passes.
 
-For UI work, check the local design-system docs and relevant UI skill before editing. Preserve accessibility, responsive behavior, and platform conventions.
+For ambiguous or high-impact choices, write down the options, tradeoffs, recommendation, and decision.
 
 ## Coding Standards
 
@@ -65,7 +66,7 @@ Before reporting completion:
 
 1. Run fresh verification that proves the requested outcome.
 2. Read the full command output and check exit codes.
-3. Update relevant docs with what changed and why when the project has docs for that area.
+3. Update relevant docs with what changed and why when the change affects process, decisions, risks, or project behavior.
 4. Update `docs/changelog.md` when it exists and the change is significant.
 5. Report what changed, what verification ran, and any remaining risk.
 

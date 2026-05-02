@@ -16,11 +16,12 @@ This document describes the reusable workflow agents should follow in this proje
 - Prefer existing project patterns.
 - Add tests before behavior changes when practical.
 - For bugs, find root cause before changing code.
+- For significant choices, compare options and update `docs/decision-log.md`.
 - Do not rewrite unrelated code.
 
 ## After Work
 
 1. Run fresh verification.
-2. Update relevant docs with what changed and why.
+2. Update relevant process, decision, gotcha, or changelog docs with what changed and why.
 3. Add a short `docs/changelog.md` entry for significant changes.
 4. Report changed files, verification, and any remaining risk.

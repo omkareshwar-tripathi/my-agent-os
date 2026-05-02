@@ -74,9 +74,9 @@ Replace INPUT_PATH with the actual path the user provided. Do NOT cat or print t
 
 ```
 Corpus: X files · ~Y words
-  code:     N files (.py .ts .go ...)
-  docs:     N files (.md .txt ...)
-  papers:   N files (.pdf ...)
+  code:     N files
+  docs:     N files
+  papers:   N files
   images:   N files
 ```
 
@@ -186,7 +186,7 @@ Code files: focus on semantic edges AST cannot find (call relationships, shared 
   Do not re-extract imports - AST already has those.
 Doc/paper files: extract named concepts, entities, citations.
 Image files: use vision to understand what the image IS - do not just OCR.
-  UI screenshot: layout patterns, design decisions, key elements, purpose.
+  Interface screenshot: layout patterns, design decisions, key elements, purpose.
   Chart: metric, trend/insight, data source.
   Tweet/post: claim as node, author, concepts mentioned.
   Diagram: components and connections.
@@ -1085,7 +1085,7 @@ python3 -m graphify.watch INPUT_PATH --debounce 3
 
 Replace INPUT_PATH with the folder to watch. Behavior depends on what changed:
 
-- **Code files only (.py, .ts, .go, etc.):** re-runs AST extraction + rebuild + cluster immediately, no LLM needed. `graph.json` and `GRAPH_REPORT.md` are updated automatically.
+- **Code files only:** re-runs AST extraction + rebuild + cluster immediately, no LLM needed. `graph.json` and `GRAPH_REPORT.md` are updated automatically.
 - **Docs, papers, or images:** writes a `graphify-out/needs_update` flag and prints a notification to run `/graphify --update` (LLM semantic re-extraction required).
 
 Debounce (default 3s): waits until file activity stops before triggering, so a wave of parallel agent writes doesn't trigger a rebuild per file.

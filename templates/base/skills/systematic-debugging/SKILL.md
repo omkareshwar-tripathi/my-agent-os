@@ -64,7 +64,7 @@ You MUST complete each phase before proceeding to the next.
 
 4. **Gather Evidence in Multi-Component Systems**
 
-   **WHEN system has multiple components (CI → build → signing, API → service → database):**
+   **WHEN system has multiple components (CI → build → signing, request → service → storage):**
 
    **BEFORE proposing fixes, add diagnostic instrumentation:**
    ```

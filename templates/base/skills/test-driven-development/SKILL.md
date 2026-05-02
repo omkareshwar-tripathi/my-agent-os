@@ -85,7 +85,7 @@ After green only:
 Keep tests green. Don't add behavior.
 
 ### Repeat
-Next failing test for next feature.
+Write the following failing test for the following behavior.
 
 ## Common Rationalizations
 | Excuse | Reality |

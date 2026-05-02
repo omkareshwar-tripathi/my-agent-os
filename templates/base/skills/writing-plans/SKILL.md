@@ -39,9 +39,7 @@ This structure informs the task decomposition. Each task should produce self-con
 
 **Goal:** [One sentence describing what this builds]
 
-**Architecture:** [2-3 sentences about approach]
-
-**Tech Stack:** [Key technologies/libraries]
+**Approach:** [2-3 sentences about the implementation strategy and boundaries]
 
 ---
 ```
@@ -51,22 +49,22 @@ This structure informs the task decomposition. Each task should produce self-con
 ### Task N: [Component Name]
 
 **Files:**
-- Create: `exact/path/to/file.swift`
-- Modify: `exact/path/to/existing.swift:123-145`
-- Test: `tests/exact/path/to/test.swift`
+- Create: `exact/path/to/new-file`
+- Modify: `exact/path/to/existing-file:123-145`
+- Test: `exact/path/to/test-file`
 
 - [ ] **Step 1: Write the failing test**
 
-```swift
-func testSpecificBehavior() {
-    let result = function(input)
-    XCTAssertEqual(result, expected)
-}
+```text
+Test: specific behavior name
+Given: the minimal setup
+When: the behavior is exercised
+Then: the expected observable result occurs
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: the exact project test command recorded in `docs/tech-stack.md`
+Run: the exact project test command recorded in the target project's docs or package/build configuration
 Expected: FAIL with the missing behavior or symbol named by the test
 
 - [ ] **Step 3: Write minimal implementation**

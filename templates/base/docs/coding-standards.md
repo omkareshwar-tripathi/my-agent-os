@@ -1,35 +1,40 @@
-# Coding Standards
+# Coding Discipline
 
-Project-specific standards go here. Keep sections focused so agents can read only what applies.
+Stack-specific standards belong in the target project. This file only defines reusable coding discipline.
 
-## 1. Language And Style
+## 1. Fit The Existing Project
 
-Match the existing style, formatter, naming conventions, and project architecture.
+- Match existing style, naming, formatting, and architecture.
+- Read nearby code before inventing a pattern.
+- Add new conventions only when the existing project has no relevant pattern.
 
-## 2. Architecture
+## 2. Keep Changes Surgical
 
-Prefer small units with explicit dependencies. Avoid speculative abstractions and broad refactors.
+- Touch only files needed for the request.
+- Avoid unrelated refactors, formatting churn, and opportunistic cleanup.
+- Remove only dead code introduced by your own change unless explicitly asked.
 
-## 3. State And Data Flow
+## 3. Prefer Simple Boundaries
 
-Keep state ownership clear. Document cross-module state and persistence rules in `docs/architecture-decisions.md` or `docs/data-models.md`.
+- Keep units small and understandable.
+- Make dependencies explicit.
+- Do not add abstractions for single-use code.
+- Document major boundary decisions in `docs/decision-log.md`.
 
-## 4. UI And Accessibility
+## 4. Test Behavior
 
-Use the local design system. Preserve accessible names, keyboard or touch behavior, contrast, reduced-motion behavior, and responsive layout.
+- Add or update tests for behavior changes and bug fixes when the project has a test setup.
+- For bugs, prefer a regression test that fails before the fix.
+- If automated tests are not practical, document the manual verification path.
 
-## 5. Error Handling
+## 5. Handle Errors At Boundaries
 
 Handle errors at boundaries where the user, caller, or log can act on them. Do not hide failures with empty catches or broad fallbacks.
 
-## 6. Testing
+## 6. Keep Secrets Out
 
-Add or update tests for behavior changes and bug fixes. Prefer the project's existing test framework.
+Do not commit secrets. Avoid logging credentials, tokens, personal data, or sensitive payloads.
 
-## 7. Security
+## 7. Verify Before Completion
 
-Do not commit secrets. Validate untrusted input. Avoid logging credentials, tokens, personal data, or sensitive payloads.
-
-## 8. Performance
-
-Avoid avoidable work in hot paths. Preserve lazy loading, caching, pagination, and rendering constraints documented by the project.
+Run fresh verification before claiming work is complete. Read the output and report the actual result.
