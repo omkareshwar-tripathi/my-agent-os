@@ -6,8 +6,10 @@ requires: []
 agents_fragment: "agents.md"
 docs: []
 skills:
-  methods: []
-  tools: []
+  methods:
+    - skills/methods/emil-design-eng
+  tools:
+    - skills/tools/extract-design
 settings:
   permissions: "settings/permissions.json"
   hooks: "settings/hooks.json"

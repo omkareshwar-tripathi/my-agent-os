@@ -6,7 +6,8 @@ requires: []
 agents_fragment: "agents.md"
 docs: []
 skills:
-  methods: []
+  methods:
+    - skills/methods/swiftui-pro
   tools: []
 settings:
   permissions: "settings/permissions.json"

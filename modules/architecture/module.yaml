@@ -7,7 +7,14 @@ agents_fragment: "agents.md"
 docs: []
 skills:
   methods: []
-  tools: []
+  tools:
+    - skills/tools/gitnexus-guide
+    - skills/tools/gitnexus-cli
+    - skills/tools/gitnexus-exploring
+    - skills/tools/gitnexus-debugging
+    - skills/tools/gitnexus-impact-analysis
+    - skills/tools/gitnexus-refactoring
+    - skills/tools/gitnexus-pr-review
 settings:
   permissions: "settings/permissions.json"
   hooks: "settings/hooks.json"

@@ -7,7 +7,9 @@ agents_fragment: "agents.md"
 docs: []
 skills:
   methods: []
-  tools: []
+  tools:
+    - skills/tools/caveman
+    - skills/tools/caveman-compress
 settings:
   permissions: "settings/permissions.json"
   hooks: "settings/hooks.json"
