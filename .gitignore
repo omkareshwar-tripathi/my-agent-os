@@ -2,7 +2,9 @@
 *.log
 *.tmp
 *.agent-workflow.new
+*.agent-os.new
 node_modules/
 .env
 .env.*
 !.env.example
+.installed-projects

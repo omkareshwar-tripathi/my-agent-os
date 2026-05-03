@@ -1,0 +1,13 @@
+name: "react"
+type: "stack"
+description: "React component patterns, hooks, state management"
+version: 1
+requires: []
+agents_fragment: "agents.md"
+docs: []
+skills:
+  methods: []
+  tools: []
+settings:
+  permissions: "settings/permissions.json"
+  hooks: "settings/hooks.json"

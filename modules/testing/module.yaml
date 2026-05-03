@@ -1,0 +1,13 @@
+name: "testing"
+type: "function"
+description: "Test strategy, TDD, integration testing, E2E testing, test patterns"
+version: 1
+requires: []
+agents_fragment: "agents.md"
+docs: []
+skills:
+  methods: []
+  tools: []
+settings:
+  permissions: "settings/permissions.json"
+  hooks: "settings/hooks.json"

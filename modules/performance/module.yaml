@@ -1,0 +1,13 @@
+name: "performance"
+type: "function"
+description: "Optimization, profiling, caching strategies, bundle size, Core Web Vitals"
+version: 1
+requires: []
+agents_fragment: "agents.md"
+docs: []
+skills:
+  methods: []
+  tools: []
+settings:
+  permissions: "settings/permissions.json"
+  hooks: "settings/hooks.json"

@@ -1,0 +1,12 @@
+name: webapp
+description: "Web application with Next.js"
+modules:
+  - frontend
+  - design
+  - testing
+  - performance
+  - code-quality
+  - security
+stacks:
+  - nextjs
+  - react

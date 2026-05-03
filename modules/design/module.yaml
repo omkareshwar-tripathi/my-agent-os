@@ -1,0 +1,13 @@
+name: "design"
+type: "function"
+description: "Design systems, visual consistency, typography, spacing, responsive patterns"
+version: 1
+requires: []
+agents_fragment: "agents.md"
+docs: []
+skills:
+  methods: []
+  tools: []
+settings:
+  permissions: "settings/permissions.json"
+  hooks: "settings/hooks.json"

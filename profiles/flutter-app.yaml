@@ -1,0 +1,10 @@
+name: flutter-app
+description: "Flutter cross-platform application"
+modules:
+  - frontend
+  - design
+  - testing
+  - performance
+  - code-quality
+stacks:
+  - flutter

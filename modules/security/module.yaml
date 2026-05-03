@@ -1,0 +1,13 @@
+name: "security"
+type: "function"
+description: "Authentication, authorization, input validation, secrets management, OWASP patterns"
+version: 1
+requires: []
+agents_fragment: "agents.md"
+docs: []
+skills:
+  methods: []
+  tools: []
+settings:
+  permissions: "settings/permissions.json"
+  hooks: "settings/hooks.json"

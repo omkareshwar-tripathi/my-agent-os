@@ -1,0 +1,13 @@
+name: "flutter"
+type: "stack"
+description: "Flutter cross-platform development with Dart"
+version: 1
+requires: []
+agents_fragment: "agents.md"
+docs: []
+skills:
+  methods: []
+  tools: []
+settings:
+  permissions: "settings/permissions.json"
+  hooks: "settings/hooks.json"

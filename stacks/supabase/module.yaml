@@ -1,0 +1,13 @@
+name: "supabase"
+type: "stack"
+description: "Supabase database, auth, RLS, realtime, edge functions"
+version: 1
+requires: []
+agents_fragment: "agents.md"
+docs: []
+skills:
+  methods: []
+  tools: []
+settings:
+  permissions: "settings/permissions.json"
+  hooks: "settings/hooks.json"

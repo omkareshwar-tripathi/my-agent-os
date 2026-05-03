@@ -1,0 +1,10 @@
+name: ios-app
+description: "Native iOS application development"
+modules:
+  - frontend
+  - design
+  - testing
+  - performance
+  - code-quality
+stacks:
+  - ios

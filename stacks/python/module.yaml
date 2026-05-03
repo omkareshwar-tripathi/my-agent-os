@@ -1,0 +1,13 @@
+name: "python"
+type: "stack"
+description: "Python development with type hints, PEP 8, virtual environments"
+version: 1
+requires: []
+agents_fragment: "agents.md"
+docs: []
+skills:
+  methods: []
+  tools: []
+settings:
+  permissions: "settings/permissions.json"
+  hooks: "settings/hooks.json"
