@@ -63,12 +63,22 @@ no auto-fixing):
 | Phase | Agent | What it does |
 |---|---|---|
 | **A — plan** | opus, ~110K | brainstorm + lock a plan + GitNexus impact pre-check |
-| **B — feat** | opus, ~70K | implement Swift, `xcodebuild build`, `feat:` commit |
-| **C — test** | opus, ~70K | write isolation tests, `xcodebuild test`, `test:` commit |
+| **B — feat** | sonnet, ~70K | implement Swift, `xcodebuild build`, `feat:` commit |
+| **C — test** | sonnet, ~70K | write isolation tests, `xcodebuild test`, `test:` commit |
 | **D — docs** | sonnet, ~35K | update feature-log + mapped docs, `docs:` commit |
 | **E — simplify** | sonnet ×3 parallel, ~110K | three lenses: Reuse, Quality, Efficiency |
 | **F — review** | opus, ~100K | run `/review` once → write `brick-NN-review.md` |
 | **Phase 7 (inline)** | orchestrator, ~5K | 5 `STATUS.md` edits + `npx gitnexus analyze` + 2 `chore:` commits |
+
+**Model split rationale:** opus is reserved for the two *judgment* phases — **A** (scoping
+the brick, peer-mirror detection, reading the impact analysis) and **F** (adversarial
+APPROVE/reject review). **B and C run on sonnet** because by then the locked plan already
+contains the exact code and tests to transcribe; they are bounded below by `xcodebuild`
+and above by the opus orchestrator's post-phase git verification plus the F review, so a
+weaker executor can only fail *visibly*. This cuts opus spend ~40%/brick — and since the
+usage-limit ceiling is opus-weighted, it lengthens autonomous runs. Each phase stamps the
+model that authored it in the `Co-Authored-By` commit trailer. If B/C bricks start drawing
+review must-fixes, the cheapest first lever is to put **C (test)** back on opus.
 
 **Halt conditions** (no auto-recovery): any phase reports `BLOCKED` or
 `DONE_WITH_CONCERNS`; a verification mismatch (wrong commit count, wrong last-commit
