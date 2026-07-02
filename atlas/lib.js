@@ -75,6 +75,7 @@ function syncAll() {
       if (fs.existsSync(path.join(r.path, 'BRICKS.md'))) writeLayer(cacheDir, 'progress', readProgress(r.path));
       if (fs.existsSync(path.join(r.path, 'vision/README.md'))) writeLayer(cacheDir, 'vision', readVision(r.path));
       if (fs.existsSync(path.join(r.path, 'STATUS.md'))) writeLayer(cacheDir, 'status', readStatus(r.path));
+      if (fs.existsSync(path.join(r.path, '.claude', 'settings.json'))) writeLayer(cacheDir, 'claude', readClaudeSetup(r.path));
     }
     out.push({ ...r, present });
   }
@@ -191,16 +192,38 @@ function readStatus(repoRoot) {
   const lines = fs.readFileSync(path.join(repoRoot, 'STATUS.md'), 'utf8').split('\n');
   const um = (lines[0] || '').match(/updated\s+(\d{4}-\d{2}-\d{2})/);
   const section = (re) => stripInline(sectionBody(lines, re).filter((l) => l.trim() && !isPlaceholder(l)).join(' '));
-  const next = sectionBody(lines, /^##\s+Next\b/)
+  const bullets = (re) => sectionBody(lines, re)
     .filter((l) => /^\s*-\s+/.test(l) && !isPlaceholder(l))
     .map((l) => stripInline(l.replace(/^\s*-\s+/, '')));
   return {
     updated: um ? um[1] : '',
     pitch: section(/^##\s+What this is\b/),
     now: section(/^##\s+Now\b/),
-    next,
+    next: bullets(/^##\s+Next\b/),
+    recent: bullets(/^##\s+Recently done\b/),
     generatedAt: today(),
   };
+}
+
+// --- claude setup (.claude/settings.json — what the agent-OS applied here) ---
+
+function readClaudeSetup(repoRoot) {
+  const out = { plugins: [], hooks: {}, generatedAt: today() };
+  try {
+    const s = JSON.parse(fs.readFileSync(path.join(repoRoot, '.claude', 'settings.json'), 'utf8'));
+    out.plugins = Object.keys(s.enabledPlugins || {}).filter((k) => s.enabledPlugins[k]);
+    for (const [event, entries] of Object.entries(s.hooks || {})) {
+      const scripts = [];
+      for (const e of entries) {
+        for (const h of e.hooks || []) {
+          const m = (h.command || '').match(/([\w-]+\.(?:sh|js|cjs))/);
+          scripts.push(m ? m[1] : truncate(h.command || '', 40));
+        }
+      }
+      if (scripts.length) out.hooks[event] = scripts;
+    }
+  } catch { /* no .claude/settings.json — empty setup */ }
+  return out;
 }
 
 // --- aggregate view for the dashboard ---
@@ -222,7 +245,7 @@ function state() {
       activity = days < 14 ? 'active' : days < 90 ? 'parked' : 'dormant';
       g.daysAway = days;
     }
-    return { ...r, activity, git: g, progress: readCacheLayer(r.id, 'progress'), vision: readCacheLayer(r.id, 'vision'), status: readCacheLayer(r.id, 'status') };
+    return { ...r, activity, git: g, progress: readCacheLayer(r.id, 'progress'), vision: readCacheLayer(r.id, 'vision'), status: readCacheLayer(r.id, 'status'), claude: readCacheLayer(r.id, 'claude') };
   });
   const pending = loadThoughts().thoughts.filter((t) => t.status === 'pending');
   for (const r of repos) r.pendingThoughts = pending.filter((t) => t.repoId === r.id).length;
@@ -307,4 +330,4 @@ function dataSync(op) {
   }
 }
 
-module.exports = { dataRoot, expandHome, today, loadRegistry, readGit, readProgress, readVision, readStatus, syncAll, state, addThought, loadThoughts, deliverPending, dataSync };
+module.exports = { dataRoot, expandHome, today, loadRegistry, readGit, readProgress, readVision, readStatus, readClaudeSetup, syncAll, state, addThought, loadThoughts, deliverPending, dataSync };
