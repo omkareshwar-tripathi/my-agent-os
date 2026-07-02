@@ -74,6 +74,7 @@ function syncAll() {
       writeLayer(cacheDir, 'git', readGit(r.path));
       if (fs.existsSync(path.join(r.path, 'BRICKS.md'))) writeLayer(cacheDir, 'progress', readProgress(r.path));
       if (fs.existsSync(path.join(r.path, 'vision/README.md'))) writeLayer(cacheDir, 'vision', readVision(r.path));
+      if (fs.existsSync(path.join(r.path, 'STATUS.md'))) writeLayer(cacheDir, 'status', readStatus(r.path));
     }
     out.push({ ...r, present });
   }
@@ -178,6 +179,30 @@ function readVision(repoRoot) {
   return { northStar, pitch, capabilities, openQuestions, generatedAt: today() };
 }
 
+// --- status (STATUS.md — the one-file overview installed by adopt.js) ---
+
+// Template placeholders are _italic (fill me in)_ lines — treat as empty.
+function isPlaceholder(l) {
+  const t = l.trim().replace(/^-\s+/, '');
+  return t.startsWith('_') && t.endsWith('_');
+}
+
+function readStatus(repoRoot) {
+  const lines = fs.readFileSync(path.join(repoRoot, 'STATUS.md'), 'utf8').split('\n');
+  const um = (lines[0] || '').match(/updated\s+(\d{4}-\d{2}-\d{2})/);
+  const section = (re) => stripInline(sectionBody(lines, re).filter((l) => l.trim() && !isPlaceholder(l)).join(' '));
+  const next = sectionBody(lines, /^##\s+Next\b/)
+    .filter((l) => /^\s*-\s+/.test(l) && !isPlaceholder(l))
+    .map((l) => stripInline(l.replace(/^\s*-\s+/, '')));
+  return {
+    updated: um ? um[1] : '',
+    pitch: section(/^##\s+What this is\b/),
+    now: section(/^##\s+Now\b/),
+    next,
+    generatedAt: today(),
+  };
+}
+
 // --- aggregate view for the dashboard ---
 
 function readCacheLayer(repoId, layer) {
@@ -197,7 +222,7 @@ function state() {
       activity = days < 14 ? 'active' : days < 90 ? 'parked' : 'dormant';
       g.daysAway = days;
     }
-    return { ...r, activity, git: g, progress: readCacheLayer(r.id, 'progress'), vision: readCacheLayer(r.id, 'vision') };
+    return { ...r, activity, git: g, progress: readCacheLayer(r.id, 'progress'), vision: readCacheLayer(r.id, 'vision'), status: readCacheLayer(r.id, 'status') };
   });
   const pending = loadThoughts().thoughts.filter((t) => t.status === 'pending');
   for (const r of repos) r.pendingThoughts = pending.filter((t) => t.repoId === r.id).length;
@@ -282,4 +307,4 @@ function dataSync(op) {
   }
 }
 
-module.exports = { dataRoot, expandHome, today, loadRegistry, readGit, readProgress, readVision, syncAll, state, addThought, loadThoughts, deliverPending, dataSync };
+module.exports = { dataRoot, expandHome, today, loadRegistry, readGit, readProgress, readVision, readStatus, syncAll, state, addThought, loadThoughts, deliverPending, dataSync };

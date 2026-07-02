@@ -14,8 +14,8 @@ function productCard(r) {
       ${r.present ? '' : '<span class="badge">not on this device</span>'}
       ${r.pendingThoughts ? `<span class="badge">${r.pendingThoughts} thought${r.pendingThoughts > 1 ? 's' : ''} queued</span>` : ''}
     </div>
-    ${r.vision?.northStar ? `<p class="north">${esc(r.vision.northStar)}</p>` : ''}
-    ${doing ? `<p class="doing">▶ ${esc(doing.title)}</p>` : '<p class="doing muted">no BRICKS.md yet</p>'}
+    ${r.vision?.northStar ? `<p class="north">${esc(r.vision.northStar)}</p>` : r.status?.pitch ? `<p class="north">${esc(r.status.pitch)}</p>` : ''}
+    ${doing ? `<p class="doing">▶ ${esc(doing.title)}</p>` : r.status?.now ? `<p class="doing">▶ ${esc(r.status.now)}</p>` : '<p class="doing muted">no status yet — run adopt.js</p>'}
     <p class="foot">
       ${g ? `<code>${esc(g.branch)}</code> ${esc(g.lastCommitSubject)}` : 'no git data'}
       ${nextCount ? ` · ${nextCount} next` : ''}
