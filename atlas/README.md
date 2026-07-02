@@ -1,55 +1,47 @@
-# Atlas Hub
+# Atlas
 
-One dashboard for every repo on this machine: status, vision, progress, and a
-thought inbox — served locally, derived live from each repo's git + markdown.
-Personal data (registry, thoughts, cache) lives in a separate PRIVATE repo
-(`~/atlas-data`), never here.
-
-## Run it
-
-    node atlas/server.js     # → http://127.0.0.1:7843
+A file-based agent OS for your repos — no server, no daemon, no database.
+The standard lives here; each repo carries its own copy; a static dashboard
+gives you the overview. Personal data (the repo registry, generated
+dashboard, loose notes) lives in a separate PRIVATE folder (`~/atlas-data`),
+never here.
 
 Zero dependencies (Node 18+). Tests: `node --test atlas/test/*.test.js`.
 
-## Adopt a repo (connect any project in one command)
+## The pieces
 
-    cd /path/to/your/repo
-    node /path/to/my-agent-os/atlas/adopt.js
+1. **The standard** — `STATUS.md` (a ~25-line overview: What this is / Now /
+   Next / Recently done / How we work here) plus four Claude hooks: STATUS.md
+   injected at session start, a freshness gate at session end, a skill
+   reminder each prompt, and an advisory simplify nudge. Hook sources live in
+   `atlas/adopt/hooks/` — edit them here, re-run adopt to refresh a repo.
+2. **adopt** — one command connects any repo:
 
-Idempotent — safe to re-run. It sets up four things:
+       cd /path/to/your/repo
+       node /path/to/my-agent-os/atlas/adopt.js
 
-1. **`STATUS.md`** at the repo root (only if missing) — a ~25-line overview
-   (What this is / Now / Next / Recently done / How we work here), pre-filled
-   from git. This is the one file a human or agent reads to get oriented.
-2. **Four standard hooks** in `.claude/hooks/`: STATUS.md injected at session
-   start, a freshness gate at session end, a skill reminder each prompt, and
-   an advisory simplify nudge.
-3. **Hook wiring** merged into `.claude/settings.json` (existing settings
-   preserved).
-4. **Registration** in the private atlas-data registry, so the repo appears
-   on the dashboard.
+   Idempotent, and it validates before it writes: an unparseable
+   `.claude/settings.json` or a registry id collision aborts with nothing
+   touched. It creates STATUS.md (only if missing, pre-filled from git),
+   installs the hooks, wires them into `.claude/settings.json` (existing
+   settings preserved), registers the repo, and prints a survey of any
+   pre-existing Claude assets (skills, commands, extra hooks) so you can fold
+   them into the standard.
+3. **dashboard** — one static HTML snapshot, regenerated on demand:
 
-After adopting, open STATUS.md and fill in the two placeholder sections.
+       node atlas/dashboard.js        # → ~/atlas-data/dashboard.html
 
-## How it works
+   Per repo: status (Now / Next / pitch), git freshness, and the applied
+   Claude setup (hooks, skills, commands, plugins, docs). A broken repo shows
+   its error on its own card — it never blanks the page. Open the file, read,
+   then act on the repo itself (or ask your agent to).
+4. **Thoughts** — plain text in the repo. Jot `- [ ] date — thought` into a
+   repo's `THOUGHTS.md`; the repo's next session triages it. No pipeline, no
+   sync, nothing to corrupt.
 
-- **Registry** (`~/atlas-data/registry.json`, private repo): the list of repos,
-  tiered `product` (rich view) / `satellite` (git-basics).
-- **Sync on page load:** every dashboard load re-derives each present repo's
-  layers — git state, `BRICKS.md` kanban (Done/Doing/Next/Blocked), and
-  `vision/README.md` (north star, pitch, capabilities) — into
-  `~/atlas-data/cache/`, then auto-commits/pushes the data repo.
-- **Thought inbox:** the quick-add box files a thought into `thoughts.json`
-  and appends it to the target repo's `THOUGHTS.md` (`- [ ] date — text`).
-  Thoughts for repos not on this device stay pending and deliver on the next
-  sync where the repo exists. In-repo triage turns them into vision or
-  BRICKS items.
-- **New device:** clone this repo + your private `atlas-data` next to `~`,
-  install the LaunchAgent below, done — the dashboard renders from cached
-  status even before you clone the project repos.
+## How the pieces travel
 
-## Auto-start at login (macOS)
-
-    sed -e "s|__NODE__|$(command -v node)|" -e "s|__REPO__|$PWD|" \
-      atlas/launchd/com.atlas.hub.plist > ~/Library/LaunchAgents/com.atlas.hub.plist
-    launchctl load ~/Library/LaunchAgents/com.atlas.hub.plist
+Each adopted repo carries its own STATUS.md, THOUGHTS.md, and hooks — they
+sync wherever the repo's own git remote goes. The only machine-local file is
+the registry (`~/atlas-data/registry.json`, a short JSON list of repo paths);
+on a new device, re-adopt your repos or recreate it by hand.

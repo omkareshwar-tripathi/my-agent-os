@@ -1,6 +1,6 @@
 'use strict';
-// Atlas hub — shared library. Adapters generalized from SpeakType's .atlas/sync.js,
-// parameterized by repoRoot so one hub serves every registered repo.
+// Atlas — shared library. Per-repo readers over a plain registry file.
+// No server, no cache, no cloud sync: the repos themselves are the store.
 // Zero dependencies — Node built-ins only (Node 18+).
 
 const fs = require('node:fs');
@@ -14,8 +14,10 @@ function dataRoot() {
 function expandHome(p) {
   return p.startsWith('~') ? path.join(os.homedir(), p.slice(1)) : p;
 }
+// Local calendar date — matches git commit dates and `date +%F` on this machine.
 function today() {
-  return new Date().toISOString().slice(0, 10);
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 function git(repoRoot, args) {
   return execSync('git ' + args, {
@@ -41,48 +43,19 @@ function loadRegistry() {
 // --- adapters (per-repo readers) ---
 
 function readGit(repoRoot) {
-  const iso = git(repoRoot, 'log -1 --format=%cI');
-  const commitDay = iso.slice(0, 10);
-  const daysAway = Math.round((Date.parse(today()) - Date.parse(commitDay)) / 86400000);
+  const commitDay = git(repoRoot, 'log -1 --format=%cs');
+  // Clamped: a commit stamped "tomorrow" in another timezone must not go negative.
+  const daysAway = Math.max(0, Math.round((Date.parse(today()) - Date.parse(commitDay)) / 86400000));
   return {
     branch: git(repoRoot, 'rev-parse --abbrev-ref HEAD'),
-    lastCommitISO: iso,
     lastCommitDate: commitDay,
     lastCommitSubject: git(repoRoot, 'log -1 --format=%s'),
-    lastCommitAuthor: git(repoRoot, 'log -1 --format=%an'),
     cleanTree: git(repoRoot, 'status --porcelain') === '',
     daysAway,
-    generatedAt: today(),
   };
 }
 
-// --- sync driver ---
-
-function writeLayer(cacheDir, layer, payload) {
-  fs.writeFileSync(path.join(cacheDir, layer + '.json'), JSON.stringify(payload, null, 2) + '\n');
-}
-
-function syncAll() {
-  deliverPending();
-  const repos = loadRegistry();
-  const out = [];
-  for (const r of repos) {
-    const present = fs.existsSync(r.path) && isGitRepo(r.path);
-    if (present) {
-      const cacheDir = path.join(dataRoot(), 'cache', r.id);
-      fs.mkdirSync(cacheDir, { recursive: true });
-      writeLayer(cacheDir, 'git', readGit(r.path));
-      if (fs.existsSync(path.join(r.path, 'BRICKS.md'))) writeLayer(cacheDir, 'progress', readProgress(r.path));
-      if (fs.existsSync(path.join(r.path, 'vision/README.md'))) writeLayer(cacheDir, 'vision', readVision(r.path));
-      if (fs.existsSync(path.join(r.path, 'STATUS.md'))) writeLayer(cacheDir, 'status', readStatus(r.path));
-      if (fs.existsSync(path.join(r.path, '.claude', 'settings.json'))) writeLayer(cacheDir, 'claude', readClaudeSetup(r.path));
-    }
-    out.push({ ...r, present });
-  }
-  return out;
-}
-
-// --- markdown helpers (ported from SpeakType .atlas/sync.js:45-92) ---
+// --- markdown helpers ---
 
 function truncate(s, n) {
   const t = s.replace(/\s+/g, ' ').trim();
@@ -116,7 +89,7 @@ function parseTable(lines) {
   return rows;
 }
 
-// --- progress (BRICKS.md) — ported from SpeakType bricksAdapter, minus branch markers ---
+// --- progress (BRICKS.md) ---
 
 const BLOCKED_RE = /\b(blocked|deferred|gated|hardware|awaiting|parked|pending a human)\b/i;
 
@@ -151,17 +124,17 @@ function readProgress(repoRoot) {
     else if (!doing) doing = it;
     else next.push(it);
   }
-  return { doing: doing ? [doing] : [], next, blocked, done: done.slice(0, 8), generatedAt: today() };
+  return { doing: doing ? [doing] : [], next, blocked, done: done.slice(0, 8) };
 }
 
-// --- vision (vision/README.md) — ported from SpeakType visionAdapter, minus legend ---
+// --- vision (vision/README.md) ---
 
 const CAPS_HEADING_RE = /^##\s+(capabilities\b|what's inside\b)/i;
 
 function readVision(repoRoot) {
   const lines = fs.readFileSync(path.join(repoRoot, 'vision/README.md'), 'utf8').split('\n');
   let northStar = '';
-  const nsIdx = lines.findIndex((l) => /\*\*North star:\*\*/.test(l));
+  const nsIdx = lines.findIndex((l) => /\*\*North star:\*\*/i.test(l));
   if (nsIdx >= 0) {
     const buf = [];
     for (let i = nsIdx; i < lines.length; i++) {
@@ -177,7 +150,7 @@ function readVision(repoRoot) {
   const openQuestions = sectionBody(lines, /^##\s+Open strategic questions/)
     .filter((l) => /^\s*-\s+/.test(l))
     .map((l) => stripInline(l.replace(/^\s*-\s+/, '')));
-  return { northStar, pitch, capabilities, openQuestions, generatedAt: today() };
+  return { northStar, pitch, capabilities, openQuestions };
 }
 
 // --- status (STATUS.md — the one-file overview installed by adopt.js) ---
@@ -201,7 +174,6 @@ function readStatus(repoRoot) {
     now: section(/^##\s+Now\b/),
     next: bullets(/^##\s+Next\b/),
     recent: bullets(/^##\s+Recently done\b/),
-    generatedAt: today(),
   };
 }
 
@@ -216,7 +188,7 @@ function listDir(p, filter) {
 }
 
 function readClaudeSetup(repoRoot) {
-  const out = { plugins: [], hooks: {}, skills: [], commands: [], docs: [], generatedAt: today() };
+  const out = { plugins: [], hooks: {}, skills: [], commands: [], docs: [] };
   try {
     const s = JSON.parse(fs.readFileSync(path.join(repoRoot, '.claude', 'settings.json'), 'utf8'));
     out.plugins = Object.keys(s.enabledPlugins || {}).filter((k) => s.enabledPlugins[k]);
@@ -224,7 +196,7 @@ function readClaudeSetup(repoRoot) {
       const scripts = [];
       for (const e of entries) {
         for (const h of e.hooks || []) {
-          const m = (h.command || '').match(/([\w-]+\.(?:sh|js|cjs))/);
+          const m = (h.command || '').match(/([\w.-]+\.(?:sh|js|cjs))/);
           scripts.push(m ? m[1] : truncate(h.command || '', 40));
         }
       }
@@ -247,112 +219,25 @@ function safeIsDir(p) {
   }
 }
 
-// --- aggregate view for the dashboard ---
+// --- the aggregate view: one pass over the registry, per-repo fault isolation ---
 
-function readCacheLayer(repoId, layer) {
-  try {
-    return JSON.parse(fs.readFileSync(path.join(dataRoot(), 'cache', repoId, layer + '.json'), 'utf8'));
-  } catch {
-    return null;
-  }
-}
-
-function state() {
-  const repos = syncAll().map((r) => {
-    const g = readCacheLayer(r.id, 'git');
-    let activity = 'unknown';
-    if (g) {
-      const days = Math.round((Date.parse(today()) - Date.parse(g.lastCommitDate)) / 86400000);
-      activity = days < 14 ? 'active' : days < 90 ? 'parked' : 'dormant';
-      g.daysAway = days;
-    }
-    return { ...r, activity, git: g, progress: readCacheLayer(r.id, 'progress'), vision: readCacheLayer(r.id, 'vision'), status: readCacheLayer(r.id, 'status'), claude: readCacheLayer(r.id, 'claude') };
-  });
-  const all = loadThoughts().thoughts;
-  const pending = all.filter((t) => t.status === 'pending');
-  for (const r of repos) {
-    r.pendingThoughts = pending.filter((t) => t.repoId === r.id).length;
-    r.thoughts = all.filter((t) => t.repoId === r.id).reverse();
-  }
-  return { generatedAt: today(), repos, unsorted: pending.filter((t) => t.repoId === 'unsorted') };
-}
-
-// --- thought inbox ---
-
-function thoughtsPath() {
-  return path.join(dataRoot(), 'thoughts.json');
-}
-function loadThoughts() {
-  try {
-    return JSON.parse(fs.readFileSync(thoughtsPath(), 'utf8'));
-  } catch {
-    return { thoughts: [] };
-  }
-}
-function saveThoughts(t) {
-  fs.writeFileSync(thoughtsPath(), JSON.stringify(t, null, 2) + '\n');
-}
-
-const THOUGHTS_HEADER =
-  '# Thoughts inbox\n\nCaptured from the Atlas hub. Triage each into `vision/` or BRICKS.md `Next up`,\nthen check it off here.\n\n';
-
-function appendToThoughtsMd(repoRoot, th) {
-  const p = path.join(repoRoot, 'THOUGHTS.md');
-  if (!fs.existsSync(p)) fs.writeFileSync(p, THOUGHTS_HEADER);
-  fs.appendFileSync(p, `- [ ] ${th.date} — ${th.text}\n`);
-}
-
-// Deliver every pending thought whose target repo is on this device.
-function deliverPending() {
-  const repos = loadRegistry();
-  const t = loadThoughts();
-  let changed = false;
-  for (const th of t.thoughts) {
-    if (th.status !== 'pending' || th.repoId === 'unsorted') continue;
-    const repo = repos.find((r) => r.id === th.repoId);
-    if (!repo || !fs.existsSync(repo.path) || !isGitRepo(repo.path)) continue;
-    appendToThoughtsMd(repo.path, th);
-    th.status = 'delivered';
-    changed = true;
-  }
-  if (changed) saveThoughts(t);
-}
-
-function addThought(repoId, text) {
-  const t = loadThoughts();
-  const id = 't' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
-  const th = { id, date: today(), repoId, text: text.replace(/\s+/g, ' ').trim(), status: 'pending' };
-  t.thoughts.push(th);
-  saveThoughts(t);
-  deliverPending();
-  return loadThoughts().thoughts.find((x) => x.id === th.id);
-}
-
-// --- atlas-data cloud sync (best-effort: offline is fine, next push carries it) ---
-
-function dataSync(op) {
-  const cwd = dataRoot();
-  const opts = { cwd, stdio: ['ignore', 'pipe', 'ignore'], encoding: 'utf8' };
-  try {
-    if (op === 'pull') {
-      execSync('git pull -q --ff-only', opts);
-      return true;
-    }
-    execSync('git add -A', opts);
-    if (execSync('git status --porcelain', opts).trim() !== '') {
-      execSync(`git commit -q -m "atlas-data: sync ${today()}"`, opts);
-    }
-    let ahead = 1; // no upstream: attempt push anyway
+function gather() {
+  return loadRegistry().map((r) => {
+    const out = { ...r, present: false, activity: 'unknown', git: null, progress: null, vision: null, status: null, claude: null, error: null };
     try {
-      ahead = Number(execSync('git rev-list --count @{u}..HEAD', opts).trim());
-    } catch {
-      // no upstream configured yet — fall through to push
+      out.present = fs.existsSync(r.path) && isGitRepo(r.path);
+      if (!out.present) return out;
+      out.git = readGit(r.path);
+      out.activity = out.git.daysAway < 14 ? 'active' : out.git.daysAway < 90 ? 'parked' : 'dormant';
+      if (fs.existsSync(path.join(r.path, 'BRICKS.md'))) out.progress = readProgress(r.path);
+      if (fs.existsSync(path.join(r.path, 'vision/README.md'))) out.vision = readVision(r.path);
+      if (fs.existsSync(path.join(r.path, 'STATUS.md'))) out.status = readStatus(r.path);
+      out.claude = readClaudeSetup(r.path);
+    } catch (err) {
+      out.error = (err.message || String(err)).split('\n')[0];
     }
-    if (ahead > 0) execSync('git push -q', opts);
-    return true;
-  } catch {
-    return false;
-  }
+    return out;
+  });
 }
 
-module.exports = { dataRoot, expandHome, today, loadRegistry, readGit, readProgress, readVision, readStatus, readClaudeSetup, syncAll, state, addThought, loadThoughts, deliverPending, dataSync };
+module.exports = { dataRoot, expandHome, today, loadRegistry, readProgress, readVision, readStatus, readClaudeSetup, gather };

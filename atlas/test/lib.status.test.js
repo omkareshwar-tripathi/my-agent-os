@@ -1,8 +1,6 @@
 'use strict';
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
 const { makeRepo, makeDataRoot } = require('./fixtures');
 const lib = require('../lib');
 
@@ -81,15 +79,23 @@ test('readStatus treats unfilled placeholders as empty', () => {
   assert.deepEqual(s.next, []);
 });
 
-test('syncAll writes status.json + claude.json and state() exposes both', () => {
+test('gather exposes status and claude layers for a present repo', () => {
   const repo = makeRepo({
     'STATUS.md': STATUS,
     '.claude/settings.json': JSON.stringify({ enabledPlugins: { 'ponytail@ponytail': true } }),
   });
-  const dataRoot = makeDataRoot([{ id: 'one', name: 'One', path: repo, tier: 'product' }]);
-  const s = lib.state();
-  assert.ok(fs.existsSync(path.join(dataRoot, 'cache/one/status.json')));
-  assert.ok(fs.existsSync(path.join(dataRoot, 'cache/one/claude.json')));
-  assert.equal(s.repos[0].status.now, 'v0 polish: Curate board — mutations surface errors.');
-  assert.deepEqual(s.repos[0].claude.plugins, ['ponytail@ponytail']);
+  makeDataRoot([{ id: 'one', name: 'One', path: repo, tier: 'product' }]);
+  const [r] = lib.gather();
+  assert.equal(r.status.now, 'v0 polish: Curate board — mutations surface errors.');
+  assert.deepEqual(r.claude.plugins, ['ponytail@ponytail']);
+});
+
+test('readClaudeSetup keeps multi-dot hook script names intact', () => {
+  const repo = makeRepo({
+    '.claude/settings.json': JSON.stringify({
+      hooks: { Stop: [{ hooks: [{ type: 'command', command: 'bash ${CLAUDE_PROJECT_DIR}/.claude/hooks/pre.check.sh' }] }] },
+    }),
+  });
+  const c = lib.readClaudeSetup(repo);
+  assert.deepEqual(c.hooks.Stop, ['pre.check.sh']);
 });
