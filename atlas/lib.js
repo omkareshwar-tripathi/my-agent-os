@@ -177,4 +177,23 @@ function readVision(repoRoot) {
   return { northStar, pitch, capabilities, openQuestions, generatedAt: today() };
 }
 
-module.exports = { dataRoot, expandHome, today, loadRegistry, readGit, readProgress, readVision, syncAll };
+// --- aggregate view for the dashboard ---
+
+function readCacheLayer(repoId, layer) {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(dataRoot(), 'cache', repoId, layer + '.json'), 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+function state() {
+  const repos = syncAll().map((r) => {
+    const g = readCacheLayer(r.id, 'git');
+    const activity = !g ? 'unknown' : g.daysAway < 14 ? 'active' : g.daysAway < 90 ? 'parked' : 'dormant';
+    return { ...r, activity, git: g, progress: readCacheLayer(r.id, 'progress'), vision: readCacheLayer(r.id, 'vision') };
+  });
+  return { generatedAt: today(), repos };
+}
+
+module.exports = { dataRoot, expandHome, today, loadRegistry, readGit, readProgress, readVision, syncAll, state };
