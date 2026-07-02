@@ -14,10 +14,13 @@ test('/api/state aggregates registry + derived layers', async () => {
   ]);
   const { server } = require('../server');
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
+  const origLog = console.log; // silence the expected sync warning
+  console.log = () => {};
   try {
     const res = await fetch(`http://127.0.0.1:${server.address().port}/api/state`);
     assert.equal(res.status, 200);
     const s = await res.json();
+    assert.equal(s.syncOk, false); // fixture dataRoot is not a git repo → pull/push fail
     const one = s.repos.find((r) => r.id === 'one');
     assert.equal(one.present, true);
     assert.equal(one.activity, 'active'); // committed today
@@ -28,6 +31,7 @@ test('/api/state aggregates registry + derived layers', async () => {
     assert.equal(sat.git, null);
     assert.equal(sat.activity, 'unknown');
   } finally {
+    console.log = origLog;
     server.close();
   }
 });

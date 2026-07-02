@@ -9,7 +9,7 @@ Personal data (registry, thoughts, cache) lives in a separate PRIVATE repo
 
     node atlas/server.js     # → http://127.0.0.1:7843
 
-Zero dependencies (Node 18+). Tests: `node --test atlas/test/` (on newer Node also: `node --test "atlas/test/*.test.js"`).
+Zero dependencies (Node 18+). Tests: `node --test atlas/test/*.test.js`.
 
 ## How it works
 
