@@ -40,6 +40,7 @@ h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color
 .next-item { margin: 0.1rem 0; font-size: 0.85rem; color: var(--muted); }
 .pitch { margin: 0.45rem 0 0; font-size: 0.8rem; color: var(--muted); font-style: italic;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#detail-overlay[hidden] { display: none; }
 #detail-overlay { position: fixed; inset: 0; background: rgba(28, 35, 48, 0.35); display: flex;
   align-items: flex-start; justify-content: center; padding: 4rem 1rem; overflow-y: auto; z-index: 10; }
 #detail { position: relative; background: var(--card); border: 1px solid var(--line); border-radius: 14px;
