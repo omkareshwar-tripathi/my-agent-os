@@ -5,6 +5,20 @@ const ago = (d) => (d === 0 ? 'today' : d === 1 ? 'yesterday' : `${d}d ago`);
 const clip = (s, n) => (s.length > n ? s.slice(0, n - 1).trimEnd() + '…' : s);
 
 let byId = {};
+let unsortedThoughts = [];
+
+// Thoughts section follows the dropdown: unsorted inbox, or the chosen repo's thoughts.
+function renderThoughts() {
+  const target = document.getElementById('target');
+  const id = target.value;
+  const items = id === 'unsorted'
+    ? unsortedThoughts.map((t) => `<li>${esc(t.date)} — ${esc(t.text)}</li>`)
+    : (byId[id]?.thoughts || []).map((t) =>
+        `<li>${esc(t.date)} — ${esc(t.text)} <span class="meta">${t.status === 'delivered' ? '✓ in THOUGHTS.md' : 'queued'}</span></li>`);
+  document.getElementById('thoughts-heading').textContent =
+    `Thoughts — ${id === 'unsorted' ? 'unsorted' : byId[id]?.name || id}`;
+  document.getElementById('unsorted').innerHTML = items.join('') || '<li class="muted">empty</li>';
+}
 
 // Compact card: leads with Now + Next (what to do), pitch shrinks to one line.
 function productCard(r) {
@@ -78,13 +92,13 @@ async function load() {
     document.getElementById('stamp').textContent = s.syncOk ? `synced ${s.generatedAt}` : 'local only — cloud sync failing';
     document.getElementById('products').innerHTML = products.map(productCard).join('');
     document.getElementById('satellites').innerHTML = satellites.map(satelliteRow).join('');
-    document.getElementById('unsorted').innerHTML =
-      s.unsorted.map((t) => `<li>${esc(t.date)} — ${esc(t.text)}</li>`).join('') || '<li class="muted">empty</li>';
+    unsortedThoughts = s.unsorted;
     const target = document.getElementById('target');
     const prev = target.value;
     target.innerHTML = '<option value="unsorted">unsorted</option>' +
       products.map((r) => `<option value="${esc(r.id)}">${esc(r.name)}</option>`).join('');
     if ([...target.options].some((o) => o.value === prev)) target.value = prev;
+    renderThoughts();
   } catch (err) {
     document.getElementById('stamp').textContent = `atlas-data missing? ${err.message}`;
   }
@@ -100,6 +114,7 @@ document.getElementById('detail-overlay').addEventListener('click', (e) => {
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeDetail();
 });
+document.getElementById('target').addEventListener('change', renderThoughts);
 
 document.getElementById('quick-add').addEventListener('submit', async (e) => {
   e.preventDefault();
