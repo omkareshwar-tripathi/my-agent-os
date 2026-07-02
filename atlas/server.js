@@ -19,7 +19,9 @@ const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://localhost');
   if (req.method === 'GET' && url.pathname === '/api/state') {
     try {
-      return json(res, 200, lib.state());
+      const s = lib.state();
+      lib.dataSync('push');
+      return json(res, 200, s);
     } catch (err) {
       return json(res, 500, { error: err.message });
     }
@@ -31,7 +33,9 @@ const server = http.createServer((req, res) => {
       try {
         const { repoId, text } = JSON.parse(body);
         if (!text || !text.trim()) return json(res, 400, { error: 'empty thought' });
-        json(res, 200, lib.addThought(repoId || 'unsorted', text));
+        const th = lib.addThought(repoId || 'unsorted', text);
+        lib.dataSync('push');
+        json(res, 200, th);
       } catch (err) {
         json(res, 400, { error: err.message });
       }
@@ -49,6 +53,7 @@ const server = http.createServer((req, res) => {
 });
 
 if (require.main === module) {
+  lib.dataSync('pull');
   server.listen(PORT, '127.0.0.1', () => console.log(`Atlas hub → http://127.0.0.1:${PORT}`));
 }
 module.exports = { server };

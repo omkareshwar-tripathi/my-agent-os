@@ -249,4 +249,25 @@ function addThought(repoId, text) {
   return loadThoughts().thoughts.find((x) => x.id === th.id);
 }
 
-module.exports = { dataRoot, expandHome, today, loadRegistry, readGit, readProgress, readVision, syncAll, state, addThought, loadThoughts, deliverPending };
+// --- atlas-data cloud sync (best-effort: offline is fine, next push carries it) ---
+
+function dataSync(op) {
+  const cwd = dataRoot();
+  const opts = { cwd, stdio: ['ignore', 'pipe', 'ignore'], encoding: 'utf8' };
+  try {
+    if (op === 'pull') {
+      execSync('git pull -q --ff-only', opts);
+      return true;
+    }
+    execSync('git add -A', opts);
+    if (execSync('git status --porcelain', opts).trim() !== '') {
+      execSync(`git commit -q -m "atlas-data: sync ${today()}"`, opts);
+    }
+    execSync('git push -q', opts);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+module.exports = { dataRoot, expandHome, today, loadRegistry, readGit, readProgress, readVision, syncAll, state, addThought, loadThoughts, deliverPending, dataSync };
