@@ -13,6 +13,7 @@ place.
 | Tool | Folder | What it covers |
 |------|--------|----------------|
 | **Claude Code** | [`claude-code/`](claude-code/) | Full setup: global + project config, hooks, plugins, MCP servers, skills, and the brick-by-brick build methodology with the `/ship` orchestrator. |
+| **Atlas Hub** | [`atlas/`](atlas/) | A local multi-repo dashboard: every project's status, vision, and progress at one URL, plus a thought inbox that files ideas into the right repo. Personal data lives in a separate private repo. |
 
 *(More tools — e.g. Codex, Gemini CLI, Cursor — will be added as sibling folders.)*
 
