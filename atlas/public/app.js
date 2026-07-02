@@ -30,18 +30,22 @@ function satelliteRow(r, byId) {
 }
 
 async function load() {
-  const s = await (await fetch('/api/state')).json();
-  const byId = Object.fromEntries(s.repos.map((r) => [r.id, r]));
-  const products = s.repos.filter((r) => r.tier === 'product');
-  const satellites = s.repos.filter((r) => r.tier === 'satellite');
-  document.getElementById('stamp').textContent = `synced ${s.generatedAt}`;
-  document.getElementById('products').innerHTML = products.map(productCard).join('');
-  document.getElementById('satellites').innerHTML = satellites.map((r) => satelliteRow(r, byId)).join('');
-  document.getElementById('unsorted').innerHTML =
-    s.unsorted.map((t) => `<li>${esc(t.date)} — ${esc(t.text)}</li>`).join('') || '<li class="muted">empty</li>';
-  const target = document.getElementById('target');
-  target.innerHTML = '<option value="unsorted">unsorted</option>' +
-    products.map((r) => `<option value="${esc(r.id)}">${esc(r.name)}</option>`).join('');
+  try {
+    const s = await (await fetch('/api/state')).json();
+    const byId = Object.fromEntries(s.repos.map((r) => [r.id, r]));
+    const products = s.repos.filter((r) => r.tier === 'product');
+    const satellites = s.repos.filter((r) => r.tier === 'satellite');
+    document.getElementById('stamp').textContent = s.syncOk ? `synced ${s.generatedAt}` : 'local only — cloud sync failing';
+    document.getElementById('products').innerHTML = products.map(productCard).join('');
+    document.getElementById('satellites').innerHTML = satellites.map((r) => satelliteRow(r, byId)).join('');
+    document.getElementById('unsorted').innerHTML =
+      s.unsorted.map((t) => `<li>${esc(t.date)} — ${esc(t.text)}</li>`).join('') || '<li class="muted">empty</li>';
+    const target = document.getElementById('target');
+    target.innerHTML = '<option value="unsorted">unsorted</option>' +
+      products.map((r) => `<option value="${esc(r.id)}">${esc(r.name)}</option>`).join('');
+  } catch (err) {
+    document.getElementById('stamp').textContent = `atlas-data missing? ${err.message}`;
+  }
 }
 
 document.getElementById('quick-add').addEventListener('submit', async (e) => {

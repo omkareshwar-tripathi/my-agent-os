@@ -31,3 +31,21 @@ test('/api/state aggregates registry + derived layers', async () => {
     server.close();
   }
 });
+
+test('POST /api/thought with unknown repoId → 400', async () => {
+  makeDataRoot([{ id: 'one', name: 'One', path: makeRepo({}), tier: 'product' }]);
+  const { server } = require('../server');
+  await new Promise((r) => server.listen(0, '127.0.0.1', r));
+  try {
+    const res = await fetch(`http://127.0.0.1:${server.address().port}/api/thought`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ repoId: 'nope-not-real', text: 'hello' }),
+    });
+    assert.equal(res.status, 400);
+    const body = await res.json();
+    assert.equal(body.error, 'unknown repoId');
+  } finally {
+    server.close();
+  }
+});

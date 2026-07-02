@@ -29,6 +29,17 @@ test('thought for an absent repo stays pending, then delivers via syncAll', () =
   assert.equal(lib.loadThoughts().thoughts[0].status, 'delivered');
 });
 
+test('deliverPending does not re-deliver an already-delivered thought', () => {
+  const repo = makeRepo({});
+  makeDataRoot([{ id: 'one', name: 'One', path: repo, tier: 'product' }]);
+  lib.addThought('one', 'ship the thing'); // delivers once internally
+  lib.deliverPending();
+  lib.deliverPending();
+  const md = fs.readFileSync(path.join(repo, 'THOUGHTS.md'), 'utf8');
+  const count = (md.match(/ship the thing/g) || []).length;
+  assert.equal(count, 1);
+});
+
 test('unsorted thoughts never touch a repo and surface in state()', () => {
   makeDataRoot([]);
   lib.addThought('unsorted', 'some day: voice memos');

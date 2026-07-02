@@ -19,8 +19,11 @@ const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://localhost');
   if (req.method === 'GET' && url.pathname === '/api/state') {
     try {
+      const pullOk = lib.dataSync('pull');
       const s = lib.state();
-      lib.dataSync('push');
+      const pushOk = lib.dataSync('push');
+      if (!pullOk || !pushOk) console.log(`atlas-data sync warning: pull=${pullOk} push=${pushOk}`);
+      s.syncOk = pullOk && pushOk;
       return json(res, 200, s);
     } catch (err) {
       return json(res, 500, { error: err.message });
@@ -33,6 +36,9 @@ const server = http.createServer((req, res) => {
       try {
         const { repoId, text } = JSON.parse(body);
         if (!text || !text.trim()) return json(res, 400, { error: 'empty thought' });
+        if (repoId && repoId !== 'unsorted' && !lib.loadRegistry().some((r) => r.id === repoId)) {
+          return json(res, 400, { error: 'unknown repoId' });
+        }
         const th = lib.addThought(repoId || 'unsorted', text);
         lib.dataSync('push');
         json(res, 200, th);

@@ -191,7 +191,12 @@ function readCacheLayer(repoId, layer) {
 function state() {
   const repos = syncAll().map((r) => {
     const g = readCacheLayer(r.id, 'git');
-    const activity = !g ? 'unknown' : g.daysAway < 14 ? 'active' : g.daysAway < 90 ? 'parked' : 'dormant';
+    let activity = 'unknown';
+    if (g) {
+      const days = Math.round((Date.parse(today()) - Date.parse(g.lastCommitDate)) / 86400000);
+      activity = days < 14 ? 'active' : days < 90 ? 'parked' : 'dormant';
+      g.daysAway = days;
+    }
     return { ...r, activity, git: g, progress: readCacheLayer(r.id, 'progress'), vision: readCacheLayer(r.id, 'vision') };
   });
   const pending = loadThoughts().thoughts.filter((t) => t.status === 'pending');
@@ -232,7 +237,7 @@ function deliverPending() {
   for (const th of t.thoughts) {
     if (th.status !== 'pending' || th.repoId === 'unsorted') continue;
     const repo = repos.find((r) => r.id === th.repoId);
-    if (!repo || !fs.existsSync(repo.path)) continue;
+    if (!repo || !fs.existsSync(repo.path) || !isGitRepo(repo.path)) continue;
     appendToThoughtsMd(repo.path, th);
     th.status = 'delivered';
     changed = true;
@@ -242,7 +247,8 @@ function deliverPending() {
 
 function addThought(repoId, text) {
   const t = loadThoughts();
-  const th = { id: 't' + Date.now(), date: today(), repoId, text: text.trim(), status: 'pending' };
+  const id = 't' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+  const th = { id, date: today(), repoId, text: text.replace(/\s+/g, ' ').trim(), status: 'pending' };
   t.thoughts.push(th);
   saveThoughts(t);
   deliverPending();
@@ -263,7 +269,13 @@ function dataSync(op) {
     if (execSync('git status --porcelain', opts).trim() !== '') {
       execSync(`git commit -q -m "atlas-data: sync ${today()}"`, opts);
     }
-    execSync('git push -q', opts);
+    let ahead = 1; // no upstream: attempt push anyway
+    try {
+      ahead = Number(execSync('git rev-list --count @{u}..HEAD', opts).trim());
+    } catch {
+      // no upstream configured yet — fall through to push
+    }
+    if (ahead > 0) execSync('git push -q', opts);
     return true;
   } catch {
     return false;
