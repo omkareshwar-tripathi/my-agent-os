@@ -8,12 +8,14 @@ INPUT=$(cat)
 echo "$INPUT" | grep -q '"stop_hook_active"[[:space:]]*:[[:space:]]*true' && exit 0
 
 PROJ="${CLAUDE_PROJECT_DIR:-$PWD}"
-[ -d "$PROJ/.git" ] || exit 0
+# -e not -d: in a git worktree .git is a file, not a directory.
+[ -e "$PROJ/.git" ] || exit 0
 cd "$PROJ" || exit 0
 command -v jq >/dev/null 2>&1 || exit 0
 
 # Source = anything changed that isn't docs/config prose.
-CHANGED=$(git diff --name-only HEAD 2>/dev/null | grep -Ev '\.(md|txt|json|ya?ml|lock)$' || true)
+# status --porcelain (not diff HEAD) so brand-new untracked files count too.
+CHANGED=$(git status --porcelain 2>/dev/null | cut -c4- | sed 's/.* -> //' | grep -Ev '\.(md|txt|json|ya?ml|lock)$' || true)
 [ -z "$CHANGED" ] && exit 0
 
 COUNT=$(printf '%s\n' "$CHANGED" | wc -l | tr -d ' ')

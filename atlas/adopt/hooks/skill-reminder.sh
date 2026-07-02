@@ -4,7 +4,7 @@
 set -euo pipefail
 
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}"
-USER_SKILLS_DIR="$HOME/.claude/skills"
+USER_SKILLS_DIR="${HOME:-/nonexistent}/.claude/skills"
 PROJECT_SKILLS_DIR="$PROJECT_DIR/.claude/skills"
 
 list_skills_in() {
