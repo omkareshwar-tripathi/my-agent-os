@@ -21,9 +21,13 @@ exits non-zero actually **blocks** the turn from ending.
 
 ## Project hooks (`<repo>/.claude/hooks/`)
 
-Five scripts, wired in [`../artifacts/project/settings.json`](../artifacts/project/settings.json).
-All five are included as artifacts under
-[`../artifacts/project/hooks/`](../artifacts/project/hooks/).
+**The four standard project hooks live in [`../../atlas/adopt/hooks/`](../../atlas/adopt/hooks/)
+— the single source of truth — and are installed + wired into a repo's
+`.claude/settings.json` by running `node atlas/adopt.js` from that repo.**
+The sections below explain what each one does. One extra project-specific hook
+remains an artifact here:
+[`check-docs-updated.sh`](../artifacts/project/hooks/check-docs-updated.sh)
+(the docs-behind-code gate used by the brick methodology).
 
 ### SessionStart — `session-start-status.sh`
 

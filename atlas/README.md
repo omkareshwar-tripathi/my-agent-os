@@ -7,6 +7,10 @@ dashboard, loose notes) lives in a separate PRIVATE folder (`~/atlas-data`),
 never here.
 
 Zero dependencies (Node 18+). Tests: `node --test atlas/test/*.test.js`.
+The companion Claude skill lives in [`skill/`](skill/) — install once per
+machine with `cp -R atlas/skill ~/.claude/skills/atlas` so any session
+understands "show my projects", "refresh my dashboard", "adopt this repo",
+and "jot X to <repo>".
 
 ## The pieces
 

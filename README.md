@@ -1,37 +1,45 @@
 # my-agent-os
 
-My personal collection of agentic-AI setups — the configurations, workflows, and
-hard-won conventions I use to get real work done with AI coding agents.
+My agent operating system: everything needed to set up my AI-agent working
+environment lives in this one repo. Point an agent here and ask it to set
+things up — the instructions below are written for it.
 
-Each AI tool gets its **own top-level folder**. Every entry documents the setup in
-plain language *and* ships the actual sanitized config files, so any setup here is
-reproducible on a fresh machine (or by someone else) by copying the artifacts into
-place.
+## For agents: "set this up"
 
-## Tools
+If a human points you at this repo and asks you to apply the setup:
 
-| Tool | Folder | What it covers |
-|------|--------|----------------|
-| **Claude Code** | [`claude-code/`](claude-code/) | Full setup: global + project config, hooks, plugins, MCP servers, skills, and the brick-by-brick build methodology with the `/ship` orchestrator. |
-| **Atlas Hub** | [`atlas/`](atlas/) | A local multi-repo dashboard: every project's status, vision, and progress at one URL, plus a thought inbox that files ideas into the right repo. Personal data lives in a separate private repo. |
+**In a project** (the common case):
 
-*(More tools — e.g. Codex, Gemini CLI, Cursor — will be added as sibling folders.)*
+    cd <the project repo>
+    node <this-repo>/atlas/adopt.js
 
-## Folder convention
+That installs the per-project standard: a `STATUS.md` overview file, four
+hooks (status injected at session start, freshness gate at session end,
+skill reminder each prompt, simplify nudge), and their wiring in
+`.claude/settings.json` — validating before it writes, preserving anything
+already there. Then help the human fill STATUS.md's two placeholder sections
+from the project's real docs and history. Details: [`atlas/README.md`](atlas/README.md).
 
-```
-my-agent-os/
-├── README.md                  # this file — the index of tools
-└── <tool>/
-    ├── README.md              # overview + how to reproduce this tool's setup
-    ├── docs/                  # plain-language documentation of each piece
-    └── artifacts/             # sanitized, copy-pasteable config files & scripts
-```
+**On a new machine** (once):
 
-## A note on secrets
+1. Install the atlas skill: `cp -R <this-repo>/atlas/skill ~/.claude/skills/atlas`
+2. Apply the global Claude Code config from
+   [`claude-code/artifacts/global/`](claude-code/artifacts/global/) —
+   settings, status line, global CLAUDE.md (review before copying; see
+   [`claude-code/README.md`](claude-code/README.md)).
 
-Everything in this repo is **sanitized**. No OAuth tokens, API keys, device IDs, or
-account-specific credentials are committed. Config files use `~`/`$HOME` instead of
-absolute machine paths, and any secret-bearing field is removed. Always review an
-artifact before reusing it, and re-authenticate tools (OAuth, etc.) on your own
-machine.
+## What's in here
+
+| Folder | What it is |
+|--------|------------|
+| [`atlas/`](atlas/) | The per-**project** standard: `STATUS.md` + 4 hooks, the one-command `adopt.js` installer, and a static dashboard generator (`node atlas/dashboard.js`) showing every repo's status and applied Claude setup. File-based — no server. |
+| [`claude-code/`](claude-code/) | The per-**machine** Claude Code setup: global settings, status line, plugins, MCP servers, skills, and the brick-by-brick build methodology docs. |
+
+The four standard hooks have ONE source of truth: `atlas/adopt/hooks/`.
+Re-running adopt in a repo refreshes its copies.
+
+## A note on secrets and personal data
+
+Everything here is **sanitized** — no tokens, keys, or machine-specific
+paths. Personal data (the repo registry, generated dashboard, notes) lives
+only in a local `~/atlas-data/` folder, never in this repo.
