@@ -111,4 +111,23 @@ if (reg.repos.some((r) => lib.expandHome(r.path) === repo || r.id === id)) {
   console.log('  ✓ registered in atlas-data (appears on your dashboard)');
 }
 
+// 5. Survey — recognize what this repo already has beyond the standard bundle,
+// so the user (or a Claude session) can decide to fold it into the setup.
+const STANDARD_HOOKS = new Set(Object.values(HOOK_WIRING).flat());
+const setup = lib.readClaudeSetup(repo);
+const extraHooks = fs.readdirSync(hooksDir).filter((h) => !STANDARD_HOOKS.has(h));
+const found = [];
+if (setup.docs.length) found.push('docs: ' + setup.docs.join(', '));
+if (setup.skills.length) found.push('skills: ' + setup.skills.join(', '));
+if (setup.commands.length) found.push('commands: /' + setup.commands.join(', /'));
+if (extraHooks.length) found.push('non-standard hooks (kept as-is): ' + extraHooks.join(', '));
+if (setup.plugins.length) found.push('plugins enabled here: ' + setup.plugins.join(', '));
+for (const f of ['BRICKS.md', 'vision/README.md', 'docs/plans']) {
+  if (fs.existsSync(path.join(repo, f))) found.push('project docs: ' + f);
+}
+if (found.length) {
+  console.log('\nAlso found in this repo (already working — review whether any should join the standard setup):');
+  for (const f of found) console.log('  • ' + f);
+}
+
 console.log('\nDone. Open STATUS.md and fill in the two placeholder sections.');

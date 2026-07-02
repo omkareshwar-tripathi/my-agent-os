@@ -47,7 +47,7 @@ test('readStatus parses updated date, pitch, now, next, and recent', () => {
   assert.deepEqual(s.recent, ['2026-06-26 Curate board shipped']);
 });
 
-test('readClaudeSetup lists enabled plugins and hook scripts by event', () => {
+test('readClaudeSetup lists plugins, hooks, skills, commands, and extras', () => {
   const repo = makeRepo({
     '.claude/settings.json': JSON.stringify({
       enabledPlugins: { 'ponytail@ponytail': true, 'off@x': false },
@@ -59,11 +59,18 @@ test('readClaudeSetup lists enabled plugins and hook scripts by event', () => {
         ],
       },
     }),
+    '.claude/skills/my-skill/SKILL.md': '---\nname: my-skill\n---\n',
+    '.claude/commands/ship.md': '# ship\n',
+    'CLAUDE.md': '# rules\n',
+    'AGENTS.md': '# agents\n',
   });
   const c = lib.readClaudeSetup(repo);
   assert.deepEqual(c.plugins, ['ponytail@ponytail']);
   assert.deepEqual(c.hooks.SessionStart, ['session-start-status.sh']);
   assert.deepEqual(c.hooks.Stop, ['check-status-updated.sh', 'run-simplify-on-stop.sh']);
+  assert.deepEqual(c.skills, ['my-skill']);
+  assert.deepEqual(c.commands, ['ship']);
+  assert.deepEqual(c.docs, ['CLAUDE.md', 'AGENTS.md']);
 });
 
 test('readStatus treats unfilled placeholders as empty', () => {

@@ -207,8 +207,16 @@ function readStatus(repoRoot) {
 
 // --- claude setup (.claude/settings.json — what the agent-OS applied here) ---
 
+function listDir(p, filter) {
+  try {
+    return fs.readdirSync(p).filter(filter).sort();
+  } catch {
+    return [];
+  }
+}
+
 function readClaudeSetup(repoRoot) {
-  const out = { plugins: [], hooks: {}, generatedAt: today() };
+  const out = { plugins: [], hooks: {}, skills: [], commands: [], docs: [], generatedAt: today() };
   try {
     const s = JSON.parse(fs.readFileSync(path.join(repoRoot, '.claude', 'settings.json'), 'utf8'));
     out.plugins = Object.keys(s.enabledPlugins || {}).filter((k) => s.enabledPlugins[k]);
@@ -223,7 +231,20 @@ function readClaudeSetup(repoRoot) {
       if (scripts.length) out.hooks[event] = scripts;
     }
   } catch { /* no .claude/settings.json — empty setup */ }
+  out.skills = listDir(path.join(repoRoot, '.claude', 'skills'), (d) => safeIsDir(path.join(repoRoot, '.claude', 'skills', d)));
+  out.commands = listDir(path.join(repoRoot, '.claude', 'commands'), (f) => f.endsWith('.md')).map((f) => f.slice(0, -3));
+  for (const doc of ['CLAUDE.md', 'AGENTS.md']) {
+    if (fs.existsSync(path.join(repoRoot, doc))) out.docs.push(doc);
+  }
   return out;
+}
+
+function safeIsDir(p) {
+  try {
+    return fs.statSync(p).isDirectory();
+  } catch {
+    return false;
+  }
 }
 
 // --- aggregate view for the dashboard ---

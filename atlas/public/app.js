@@ -49,7 +49,10 @@ function detailHtml(r) {
     ${cl && Object.keys(cl.hooks).length
       ? `<ul>${Object.entries(cl.hooks).map(([ev, scripts]) => `<li><strong>${esc(ev)}</strong> → ${esc(scripts.join(', '))}</li>`).join('')}</ul>`
       : '<p class="muted">no hooks wired — run adopt.js here</p>'}
+    ${cl?.skills?.length ? `<p class="meta">Skills: ${esc(cl.skills.join(', '))}</p>` : ''}
+    ${cl?.commands?.length ? `<p class="meta">Commands: /${esc(cl.commands.join(', /'))}</p>` : ''}
     ${cl?.plugins?.length ? `<p class="meta">Plugins: ${esc(cl.plugins.join(', '))}</p>` : ''}
+    ${cl?.docs?.length ? `<p class="meta">Docs: ${esc(cl.docs.join(', '))}</p>` : ''}
     ${st?.updated ? `<p class="meta">STATUS.md updated ${esc(st.updated)}</p>` : ''}`;
 }
 
@@ -75,8 +78,10 @@ async function load() {
     document.getElementById('unsorted').innerHTML =
       s.unsorted.map((t) => `<li>${esc(t.date)} — ${esc(t.text)}</li>`).join('') || '<li class="muted">empty</li>';
     const target = document.getElementById('target');
+    const prev = target.value;
     target.innerHTML = '<option value="unsorted">unsorted</option>' +
       products.map((r) => `<option value="${esc(r.id)}">${esc(r.name)}</option>`).join('');
+    if ([...target.options].some((o) => o.value === prev)) target.value = prev;
   } catch (err) {
     document.getElementById('stamp').textContent = `atlas-data missing? ${err.message}`;
   }
@@ -98,13 +103,19 @@ document.getElementById('quick-add').addEventListener('submit', async (e) => {
   const input = document.getElementById('thought');
   const text = input.value.trim();
   if (!text) return;
-  await fetch('/api/thought', {
+  const sel = document.getElementById('target');
+  const targetName = sel.options[sel.selectedIndex]?.text || 'unsorted';
+  const res = await fetch('/api/thought', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ repoId: document.getElementById('target').value, text }),
+    body: JSON.stringify({ repoId: sel.value, text }),
   });
   input.value = '';
-  load();
+  await load();
+  const stamp = document.getElementById('stamp');
+  stamp.textContent = res.ok
+    ? `${stamp.textContent} · thought filed → ${targetName}`
+    : `${stamp.textContent} · thought FAILED to file`;
 });
 
 load();

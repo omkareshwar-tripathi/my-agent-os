@@ -73,6 +73,22 @@ test('adopt is idempotent and merges with existing settings without clobbering',
   assert.equal(reg.repos.length, 1); // no duplicate registration
 });
 
+test('adopt surveys pre-existing Claude assets so they can be folded in', () => {
+  const repo = makeRepo({
+    'CLAUDE.md': '# rules\n',
+    '.claude/skills/legacy-skill/SKILL.md': '---\nname: legacy-skill\n---\n',
+    '.claude/commands/deploy.md': '# deploy\n',
+    '.claude/hooks/custom-thing.sh': '#!/bin/bash\n',
+  });
+  const dataRoot = makeDataRoot([]);
+  const out = runAdopt(repo, dataRoot);
+  assert.match(out, /Also found in this repo/);
+  assert.match(out, /CLAUDE\.md/);
+  assert.match(out, /legacy-skill/);
+  assert.match(out, /deploy/);
+  assert.match(out, /custom-thing\.sh/); // non-standard hook, flagged not clobbered
+});
+
 test('adopt refuses to run outside a git repo', () => {
   const dir = fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'atlas-nongit-'));
   const dataRoot = makeDataRoot([]);
