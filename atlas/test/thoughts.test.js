@@ -40,6 +40,19 @@ test('deliverPending does not re-deliver an already-delivered thought', () => {
   assert.equal(count, 1);
 });
 
+test('state() exposes each repo thoughts, delivered included, newest first', () => {
+  const repo = makeRepo({});
+  makeDataRoot([{ id: 'one', name: 'One', path: repo, tier: 'product' }]);
+  lib.addThought('one', 'first idea'); // delivers immediately (repo present)
+  lib.addThought('one', 'second idea');
+  const s = lib.state();
+  const r = s.repos[0];
+  assert.equal(r.thoughts.length, 2);
+  assert.equal(r.thoughts[0].text, 'second idea');
+  assert.equal(r.thoughts[0].status, 'delivered');
+  assert.equal(r.thoughts[1].text, 'first idea');
+});
+
 test('unsorted thoughts never touch a repo and surface in state()', () => {
   makeDataRoot([]);
   lib.addThought('unsorted', 'some day: voice memos');

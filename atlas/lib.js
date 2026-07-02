@@ -268,8 +268,12 @@ function state() {
     }
     return { ...r, activity, git: g, progress: readCacheLayer(r.id, 'progress'), vision: readCacheLayer(r.id, 'vision'), status: readCacheLayer(r.id, 'status'), claude: readCacheLayer(r.id, 'claude') };
   });
-  const pending = loadThoughts().thoughts.filter((t) => t.status === 'pending');
-  for (const r of repos) r.pendingThoughts = pending.filter((t) => t.repoId === r.id).length;
+  const all = loadThoughts().thoughts;
+  const pending = all.filter((t) => t.status === 'pending');
+  for (const r of repos) {
+    r.pendingThoughts = pending.filter((t) => t.repoId === r.id).length;
+    r.thoughts = all.filter((t) => t.repoId === r.id).reverse();
+  }
   return { generatedAt: today(), repos, unsorted: pending.filter((t) => t.repoId === 'unsorted') };
 }
 

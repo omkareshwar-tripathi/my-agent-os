@@ -53,6 +53,9 @@ function detailHtml(r) {
     ${cl?.commands?.length ? `<p class="meta">Commands: /${esc(cl.commands.join(', /'))}</p>` : ''}
     ${cl?.plugins?.length ? `<p class="meta">Plugins: ${esc(cl.plugins.join(', '))}</p>` : ''}
     ${cl?.docs?.length ? `<p class="meta">Docs: ${esc(cl.docs.join(', '))}</p>` : ''}
+    ${r.thoughts?.length
+      ? `<h3>Thoughts filed</h3><ul>${r.thoughts.map((t) => `<li>${esc(t.date)} — ${esc(t.text)} <span class="meta">${t.status === 'delivered' ? '✓ in THOUGHTS.md' : 'queued'}</span></li>`).join('')}</ul>`
+      : ''}
     ${st?.updated ? `<p class="meta">STATUS.md updated ${esc(st.updated)}</p>` : ''}`;
 }
 
