@@ -11,6 +11,26 @@ Personal data (registry, thoughts, cache) lives in a separate PRIVATE repo
 
 Zero dependencies (Node 18+). Tests: `node --test atlas/test/*.test.js`.
 
+## Adopt a repo (connect any project in one command)
+
+    cd /path/to/your/repo
+    node /path/to/my-agent-os/atlas/adopt.js
+
+Idempotent — safe to re-run. It sets up four things:
+
+1. **`STATUS.md`** at the repo root (only if missing) — a ~25-line overview
+   (What this is / Now / Next / Recently done / How we work here), pre-filled
+   from git. This is the one file a human or agent reads to get oriented.
+2. **Four standard hooks** in `.claude/hooks/`: STATUS.md injected at session
+   start, a freshness gate at session end, a skill reminder each prompt, and
+   an advisory simplify nudge.
+3. **Hook wiring** merged into `.claude/settings.json` (existing settings
+   preserved).
+4. **Registration** in the private atlas-data registry, so the repo appears
+   on the dashboard.
+
+After adopting, open STATUS.md and fill in the two placeholder sections.
+
 ## How it works
 
 - **Registry** (`~/atlas-data/registry.json`, private repo): the list of repos,
