@@ -12,6 +12,7 @@ function productCard(r) {
       <span class="dot"></span><strong>${esc(r.name)}</strong>
       <span class="meta">${r.activity}${g ? ' · ' + ago(g.daysAway) : ''}</span>
       ${r.present ? '' : '<span class="badge">not on this device</span>'}
+      ${r.pendingThoughts ? `<span class="badge">${r.pendingThoughts} thought${r.pendingThoughts > 1 ? 's' : ''} queued</span>` : ''}
     </div>
     ${r.vision?.northStar ? `<p class="north">${esc(r.vision.northStar)}</p>` : ''}
     ${doing ? `<p class="doing">▶ ${esc(doing.title)}</p>` : '<p class="doing muted">no BRICKS.md yet</p>'}
@@ -36,9 +37,25 @@ async function load() {
   document.getElementById('stamp').textContent = `synced ${s.generatedAt}`;
   document.getElementById('products').innerHTML = products.map(productCard).join('');
   document.getElementById('satellites').innerHTML = satellites.map((r) => satelliteRow(r, byId)).join('');
+  document.getElementById('unsorted').innerHTML =
+    s.unsorted.map((t) => `<li>${esc(t.date)} — ${esc(t.text)}</li>`).join('') || '<li class="muted">empty</li>';
   const target = document.getElementById('target');
   target.innerHTML = '<option value="unsorted">unsorted</option>' +
     products.map((r) => `<option value="${esc(r.id)}">${esc(r.name)}</option>`).join('');
 }
+
+document.getElementById('quick-add').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const input = document.getElementById('thought');
+  const text = input.value.trim();
+  if (!text) return;
+  await fetch('/api/thought', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ repoId: document.getElementById('target').value, text }),
+  });
+  input.value = '';
+  load();
+});
 
 load();

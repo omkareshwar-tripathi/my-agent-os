@@ -63,6 +63,7 @@ function writeLayer(cacheDir, layer, payload) {
 }
 
 function syncAll() {
+  deliverPending();
   const repos = loadRegistry();
   const out = [];
   for (const r of repos) {
@@ -193,7 +194,59 @@ function state() {
     const activity = !g ? 'unknown' : g.daysAway < 14 ? 'active' : g.daysAway < 90 ? 'parked' : 'dormant';
     return { ...r, activity, git: g, progress: readCacheLayer(r.id, 'progress'), vision: readCacheLayer(r.id, 'vision') };
   });
-  return { generatedAt: today(), repos };
+  const pending = loadThoughts().thoughts.filter((t) => t.status === 'pending');
+  for (const r of repos) r.pendingThoughts = pending.filter((t) => t.repoId === r.id).length;
+  return { generatedAt: today(), repos, unsorted: pending.filter((t) => t.repoId === 'unsorted') };
 }
 
-module.exports = { dataRoot, expandHome, today, loadRegistry, readGit, readProgress, readVision, syncAll, state };
+// --- thought inbox ---
+
+function thoughtsPath() {
+  return path.join(dataRoot(), 'thoughts.json');
+}
+function loadThoughts() {
+  try {
+    return JSON.parse(fs.readFileSync(thoughtsPath(), 'utf8'));
+  } catch {
+    return { thoughts: [] };
+  }
+}
+function saveThoughts(t) {
+  fs.writeFileSync(thoughtsPath(), JSON.stringify(t, null, 2) + '\n');
+}
+
+const THOUGHTS_HEADER =
+  '# Thoughts inbox\n\nCaptured from the Atlas hub. Triage each into `vision/` or BRICKS.md `Next up`,\nthen check it off here.\n\n';
+
+function appendToThoughtsMd(repoRoot, th) {
+  const p = path.join(repoRoot, 'THOUGHTS.md');
+  if (!fs.existsSync(p)) fs.writeFileSync(p, THOUGHTS_HEADER);
+  fs.appendFileSync(p, `- [ ] ${th.date} — ${th.text}\n`);
+}
+
+// Deliver every pending thought whose target repo is on this device.
+function deliverPending() {
+  const repos = loadRegistry();
+  const t = loadThoughts();
+  let changed = false;
+  for (const th of t.thoughts) {
+    if (th.status !== 'pending' || th.repoId === 'unsorted') continue;
+    const repo = repos.find((r) => r.id === th.repoId);
+    if (!repo || !fs.existsSync(repo.path)) continue;
+    appendToThoughtsMd(repo.path, th);
+    th.status = 'delivered';
+    changed = true;
+  }
+  if (changed) saveThoughts(t);
+}
+
+function addThought(repoId, text) {
+  const t = loadThoughts();
+  const th = { id: 't' + Date.now(), date: today(), repoId, text: text.trim(), status: 'pending' };
+  t.thoughts.push(th);
+  saveThoughts(t);
+  deliverPending();
+  return loadThoughts().thoughts.find((x) => x.id === th.id);
+}
+
+module.exports = { dataRoot, expandHome, today, loadRegistry, readGit, readProgress, readVision, syncAll, state, addThought, loadThoughts, deliverPending };

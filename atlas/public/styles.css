@@ -33,3 +33,5 @@ h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color
 #satellites { list-style: none; padding: 0; display: grid; gap: 0.4rem; }
 #satellites li { background: var(--card); border: 1px solid var(--line);
   border-radius: 10px; padding: 0.5rem 0.9rem; }
+#unsorted { list-style: none; padding: 0; display: grid; gap: 0.4rem; }
+#unsorted li { background: var(--card); border: 1px dashed var(--line); border-radius: 10px; padding: 0.5rem 0.9rem; }

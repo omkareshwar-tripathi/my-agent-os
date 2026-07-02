@@ -24,6 +24,20 @@ const server = http.createServer((req, res) => {
       return json(res, 500, { error: err.message });
     }
   }
+  if (req.method === 'POST' && url.pathname === '/api/thought') {
+    let body = '';
+    req.on('data', (c) => (body += c));
+    req.on('end', () => {
+      try {
+        const { repoId, text } = JSON.parse(body);
+        if (!text || !text.trim()) return json(res, 400, { error: 'empty thought' });
+        json(res, 200, lib.addThought(repoId || 'unsorted', text));
+      } catch (err) {
+        json(res, 400, { error: err.message });
+      }
+    });
+    return;
+  }
   const rel = url.pathname === '/' ? 'index.html' : url.pathname.slice(1);
   const file = path.join(PUBLIC, path.normalize(rel));
   if (!file.startsWith(PUBLIC) || !fs.existsSync(file) || !fs.statSync(file).isFile()) {
