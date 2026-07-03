@@ -6,17 +6,19 @@ hooks + adopt script + static Atlas dashboard) and the per-machine Claude
 Code setup (skills, hooks, plugins), kept sanitized as the reference copy.
 
 ## Now
-Standard just curated (2026-07-03): 6 global skills, 3 hooks, and a
-12-plugin project template. This repo now self-adopts its own standard.
+Rollout complete (2026-07-03): standard curated, all 8 registry repos adopted
++ pushed (Remembry deliberately excluded), and ~/.claude mirrored to this
+reference. Steady state — the OS is running.
 
 ## Next
-- Mirror the reference setup to ~/.claude (deferred)
 - Keep docs in sync with the live setup
+- Optional follow-ups (personal-site .gitignore/.claude conflict, AstrologyCounsel
+  stale remote, SpeakType build artifacts, Remembry onboarding) — only on ask
 
 ## Recently done
+- 2026-07-03  rollout: 8 repos adopted + pushed; ~/.claude mirrored to reference
 - 2026-07-03  chore(standard): curate the agent-OS standard — global-first, clutter out
-- 2026-07-03  docs: repo is now the single agent-OS entry point
-- 2026-07-02  refactor(atlas): pivot to file-based agent OS — no server, static dashboard
+- 2026-07-03  chore: self-adopt the agent-OS standard
 
 ## How we work here
 Claude reads this file at session start and keeps it updated at session end.
