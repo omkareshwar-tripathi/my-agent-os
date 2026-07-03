@@ -4,7 +4,7 @@
 //
 // Does four things, all idempotent:
 //   1. STATUS.md at the repo root (created only if missing, pre-filled from git)
-//   2. The four standard hooks copied into .claude/hooks/
+//   2. The three standard hooks copied into .claude/hooks/
 //   3. Hook wiring merged into .claude/settings.json (existing settings preserved)
 //   4. The repo registered in the local atlas registry (dashboard pickup)
 //
@@ -21,7 +21,7 @@ const HOOKS_SRC = path.join(__dirname, 'adopt', 'hooks');
 const HOOK_WIRING = {
   SessionStart: ['session-start-status.sh'],
   UserPromptSubmit: ['skill-reminder.sh'],
-  Stop: ['check-status-updated.sh', 'run-simplify-on-stop.sh'],
+  Stop: ['check-status-updated.sh'],
 };
 
 // --- validate everything first; mutate nothing until all checks pass ---
@@ -91,6 +91,8 @@ ${recent}
 ## How we work here
 Claude reads this file at session start and keeps it updated at session end.
 Project rules live in CLAUDE.md (if present). Bump the date above on every edit.
+Recently done keeps only the 3 newest entries — drop older lines when adding;
+git history of this file is the archive.
 `);
   console.log('  ✓ STATUS.md created (pre-filled from git — edit Now/Next, takes 2 min)');
 }
@@ -102,7 +104,7 @@ for (const h of fs.readdirSync(HOOKS_SRC)) {
   fs.copyFileSync(path.join(HOOKS_SRC, h), path.join(hooksDir, h));
   fs.chmodSync(path.join(hooksDir, h), 0o755);
 }
-console.log('  ✓ 4 standard hooks installed in .claude/hooks/');
+console.log('  ✓ 3 standard hooks installed in .claude/hooks/');
 
 // 3. Settings merge (preserve everything already there; add only missing wiring)
 settings.hooks = settings.hooks || {};

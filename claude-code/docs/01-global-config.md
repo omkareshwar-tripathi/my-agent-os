@@ -41,19 +41,19 @@ green < 65%, yellow < 85%, red ≥ 85%.
 
 ## Hooks defined globally
 
-Two kinds of global hooks live in `settings.json` (full behavior in
+One kind of global hook lives in `settings.json` (full behavior in
 [`05-hooks.md`](05-hooks.md)):
 
-- **GitNexus enrichment** — a Node script runs on `PreToolUse` (Grep/Glob/Bash) to
-  add code-graph context to searches, and on `PostToolUse` (Bash) to detect git
-  mutations and flag a stale index.
 - **Sound cues** — `afplay` plays `Glass.aiff` when Claude stops and `Funk.aiff` on
   notifications (macOS system sounds).
 
+(GitNexus enrichment hooks were dropped from the global standard 2026-07-03 —
+the plugin is enabled per-project where a code graph is actually maintained.)
+
 ## Plugins + marketplaces declared here
 
-- `enabledPlugins`: `superpowers` on (user-wide), `vercel-plugin` off.
-- `extraKnownMarketplaces`: registers the `vercel-vercel-plugin` (local directory)
+- `enabledPlugins`: `superpowers` and `ponytail` on (user-wide).
+- `extraKnownMarketplaces`: registers the `ponytail` (GitHub `DietrichGebert/ponytail`)
   and `gitnexus-marketplace` (GitHub `abhigyanpatwari/GitNexus`) sources.
 
 See [`02-plugins.md`](02-plugins.md) for the complete plugin picture.

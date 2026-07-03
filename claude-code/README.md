@@ -31,7 +31,7 @@ prompt).
 | [`docs/01-global-config.md`](docs/01-global-config.md) | `~/.claude/settings.json`: permission mode, thinking/effort, theme, voice, sounds, status line. |
 | [`docs/02-plugins.md`](docs/02-plugins.md) | Marketplaces and every installed plugin, with scope (user vs project). |
 | [`docs/03-mcp-servers.md`](docs/03-mcp-servers.md) | GitNexus, Serena, Context7, Claude-in-Chrome, Vercel, and the Google connectors. |
-| [`docs/04-skills.md`](docs/04-skills.md) | Superpowers skills, graphify, the ~30 user skills, and the project's Swift/iOS skills. |
+| [`docs/04-skills.md`](docs/04-skills.md) | Superpowers skills, the 6-skill global standard, and the project-scoped stack skills. |
 | [`docs/05-hooks.md`](docs/05-hooks.md) | Every global + project hook: event, trigger, and exactly what it does. |
 | [`docs/06-brick-methodology.md`](docs/06-brick-methodology.md) | The brick-by-brick waterfall, sizing rules, and the `/ship` 6-phase orchestrator. |
 | [`docs/07-memory-system.md`](docs/07-memory-system.md) | The `.remember/` tiers, auto-memory, and the `STATUS.md` build dashboard. |
@@ -45,10 +45,11 @@ The artifacts map onto two locations:
 | `artifacts/global/settings.json` | `~/.claude/settings.json` |
 | `artifacts/global/statusline.sh` | `~/.claude/statusline.sh` |
 | `artifacts/global/CLAUDE.md` | `~/.claude/CLAUDE.md` |
-| `artifacts/project/CLAUDE.md` | `<project>/CLAUDE.md` |
 | `artifacts/project/settings.json` | `<project>/.claude/settings.json` |
-| `artifacts/project/hooks/*.sh` | `<project>/.claude/hooks/` |
 | `artifacts/project/commands/ship.md` | `<project>/.claude/commands/ship.md` |
+
+(Project hooks come from `atlas/adopt/hooks/` via `node atlas/adopt.js` — not
+from artifacts here.)
 
 After copying:
 
@@ -56,10 +57,10 @@ After copying:
 2. **Install plugins** — see [`docs/02-plugins.md`](docs/02-plugins.md) for marketplaces and enable list.
 3. **Install MCP servers** — see [`docs/03-mcp-servers.md`](docs/03-mcp-servers.md). Most are launched via the plugins; GitNexus also needs `npx gitnexus analyze` to build the index.
 4. **Re-authenticate** anything OAuth-based (Vercel, Google connectors) on your own account.
-5. **Adapt the project artifacts** — `CLAUDE.md` and the doc-update hook are written for an iOS/Swift project; the path-to-doc mappings in `check-docs-updated.sh` should be retargeted for other stacks.
+5. **Adapt the project artifacts** — the `/ship` command is written for an iOS/Swift project; retarget it for other stacks. Each project writes its own `CLAUDE.md`; the cross-project engineering discipline lives in the global one.
 
 ## Caveats
 
-- The project artifacts are **iOS/SwiftUI/Core Data specific** (Swift file globs, `xcodebuild`, brick conventions). Treat them as a *pattern* to adapt, not a drop-in for arbitrary projects.
+- The `/ship` command is **iOS/SwiftUI/Core Data specific** (Swift file globs, `xcodebuild`, brick conventions). Treat it as a *pattern* to adapt, not a drop-in for arbitrary projects.
 - The `/ship` command references a machine-local plan file path; that file is the long-form orchestration spec and isn't included here (it's project-journal, not reusable config).
 - Sounds use macOS `afplay` and system `.aiff` files — Linux/Windows need a different player.

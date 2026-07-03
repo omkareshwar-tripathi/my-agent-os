@@ -15,9 +15,11 @@ and "jot X to <repo>".
 ## The pieces
 
 1. **The standard** — `STATUS.md` (a ~25-line overview: What this is / Now /
-   Next / Recently done / How we work here) plus four Claude hooks: STATUS.md
-   injected at session start, a freshness gate at session end, a skill
-   reminder each prompt, and an advisory simplify nudge. Hook sources live in
+   Next / Recently done / How we work here; Recently done holds only the 3
+   newest entries — the file is committed, so git history is the archive)
+   plus three Claude hooks: STATUS.md
+   injected at session start, a freshness gate at session end, and a skill
+   reminder each prompt. Hook sources live in
    `atlas/adopt/hooks/` — edit them here, re-run adopt to refresh a repo.
 2. **adopt** — one command connects any repo:
 

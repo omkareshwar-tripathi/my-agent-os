@@ -7,7 +7,7 @@ const { execFileSync } = require('node:child_process');
 const { makeRepo, makeDataRoot } = require('./fixtures');
 
 const ADOPT = path.join(__dirname, '..', 'adopt.js');
-const HOOKS = ['session-start-status.sh', 'check-status-updated.sh', 'skill-reminder.sh', 'run-simplify-on-stop.sh'];
+const HOOKS = ['session-start-status.sh', 'check-status-updated.sh', 'skill-reminder.sh'];
 
 function runAdopt(repo, dataRoot) {
   return execFileSync(process.execPath, [ADOPT], {
@@ -38,7 +38,7 @@ test('adopt creates STATUS.md, installs hooks, wires settings, registers the rep
   const s = JSON.parse(fs.readFileSync(path.join(repo, '.claude', 'settings.json'), 'utf8'));
   assert.equal(s.hooks.SessionStart.length, 1);
   assert.equal(s.hooks.UserPromptSubmit.length, 1);
-  assert.equal(s.hooks.Stop.length, 2);
+  assert.equal(s.hooks.Stop.length, 1);
   assert.match(JSON.stringify(s), /session-start-status\.sh/);
 
   const reg = JSON.parse(fs.readFileSync(path.join(dataRoot, 'registry.json'), 'utf8'));
@@ -67,7 +67,7 @@ test('adopt is idempotent and merges with existing settings without clobbering',
 
   const s = JSON.parse(settingsAfterFirst);
   assert.equal(s.enabledPlugins['ponytail@ponytail'], true); // preserved
-  assert.equal(s.hooks.Stop.length, 3); // pre-existing echo + our 2
+  assert.equal(s.hooks.Stop.length, 2); // pre-existing echo + our 1
 
   const reg = JSON.parse(fs.readFileSync(path.join(dataRoot, 'registry.json'), 'utf8'));
   assert.equal(reg.repos.length, 1); // no duplicate registration

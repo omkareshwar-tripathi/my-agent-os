@@ -12,7 +12,7 @@ launched by the plugins from [`02-plugins.md`](02-plugins.md).
 | **serena** | stdio | via `serena` plugin (Oraios) | Semantic, LSP-backed code analysis: symbol find/overview, references, safe rename, edit-by-symbol, project memories. |
 | **context7** | stdio/http | via `context7` plugin (Upstash) | Live, version-specific library documentation: `resolve-library-id` + `query-docs`. Use instead of guessing API shapes from training data. |
 | **claude-in-chrome** | MCP (browser) | Claude-in-Chrome extension | Browser automation: navigate, click/type, read page/console/network, screenshots, GIF recording, form input. |
-| **vercel** | HTTP (OAuth) | `https://mcp.vercel.com` (vercel plugin — currently disabled) | Read-only: search Vercel docs, list projects/deployments, inspect logs. |
+| **vercel** | HTTP (OAuth) | `https://mcp.vercel.com` (vercel plugin — removed from the standard 2026-07-03; re-add per-repo if needed) | Read-only: search Vercel docs, list projects/deployments, inspect logs. |
 | **Gmail** | claude.ai connector | Managed by claude.ai account | Search/read threads, drafts, labels. |
 | **Google Calendar** | claude.ai connector | Managed by claude.ai account | List/create/update events, suggest times. |
 | **Google Drive** | claude.ai connector | Managed by claude.ai account | Search, read, create, copy files. |

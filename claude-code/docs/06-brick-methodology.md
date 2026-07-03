@@ -93,8 +93,9 @@ no destructive ops without explicit authorization.
 
 ## Documentation & commit discipline
 
-- **Every Swift change updates a mapped doc** (enforced by `check-docs-updated.sh`,
-  see [`05-hooks.md`](05-hooks.md)). Architectural changes must record the *why*.
+- **Every Swift change updates a mapped doc** (enforced by the remembry repo's
+  own `check-docs-updated.sh` hook — kept in that repo, not part of the
+  agent-OS standard). Architectural changes must record the *why*.
 - **Conventional Commits** are mandatory (`feat:`/`fix:`/`refactor:`/`docs:`/`test:`/
   `chore:`); `git log --oneline` *is* the changelog. Committing is also the escape
   hatch that satisfies the doc/STATUS Stop hooks.

@@ -37,29 +37,38 @@ interactive HTML view, GraphRAG-ready JSON, and a plain-language report. The glo
 `~/.claude/CLAUDE.md` ([artifact](../artifacts/global/CLAUDE.md)) wires `/graphify`
 to invoke it immediately.
 
-## User skills library (`~/.claude/skills/`)
+## User skills library (`~/.claude/skills/`) — the global standard
 
-~30 skills installed from the open ecosystem (each tracked with its source repo).
-Grouped by theme:
+**The rule for this scope: only skills needed in EVERY project live here.**
+Anything stack-specific — even a stack several repos share — belongs in each
+repo's `.claude/skills/` instead. The skill-reminder hook injects every user
+skill into every prompt, so each global skill is a recurring context tax paid
+by all sessions everywhere.
 
-- **Design / UI-UX:** app-ui-design, mobile-app-ui-design, mobile-app-design-mastery,
-  ios-glass-ui-designer, ui-design-system, ui-ux-designer, ui-ux-pro-max,
-  extract-design-system, emil-design-eng, frontend-design.
-- **Frontend / web:** react-dev, nextjs-app-router-patterns, nextjs-supabase-auth,
-  vercel-react-best-practices, tailwind-design-system, framer-motion-animator,
-  clone-website, meta-tags-optimizer, deploy-to-vercel, render-deploy.
-- **Mobile:** mobile-app, flutter-design, flutter-frontend-design.
-- **Testing / quality:** playwright-e2e-testing, user-acceptance.
-- **Backend / infra:** bullmq-specialist.
-- **Meta:** find-skills (discover/install more), grill-me (stress-test a plan).
+The global standard is six skills:
 
-> These are installed from their **original source repos** and tracked in a skill
-> lock file. The convention: prefer installing from source; keep the local copy as a
-> backup if a source goes offline.
+| Skill | Why it's global |
+|---|---|
+| **atlas** | The agent-OS control (overview, dashboard, adopt, jot). |
+| **graphify** | Any-folder → knowledge graph; wired to `/graphify` in global CLAUDE.md. |
+| **find-skills** | Discover/install skills on demand — the escape hatch that lets everything else stay lean. |
+| **grill-me** | Stress-test any plan or design. |
+| **teach** | Learn a concept inside the workspace. |
+| **build-in-public** | Draft X/LinkedIn posts from any coding session. |
+
+Stack skills (web: frontend-design, react-dev, nextjs-*, ui-design-system,
+vercel-react-best-practices, deploy-to-vercel, playwright-e2e-testing,
+user-acceptance; iOS: the swift/cloudkit set) are installed per-repo where that
+stack lives. Retired skills sit in `~/.claude/skills-archive/` — restore with a
+`mv` or reinstall from source via find-skills.
+
+> Skills are installed from their **original source repos**. The convention:
+> prefer installing from source; keep the local copy as a backup if a source
+> goes offline.
 
 ## Project skills (`<repo>/.claude/skills/`) — iOS/Swift focused
 
-Eight skills scoped to the iOS project, used during brick work:
+Nine skills scoped to the iOS project, used during brick work:
 
 | Skill | Use for |
 |---|---|
@@ -69,12 +78,13 @@ Eight skills scoped to the iOS project, used during brick work:
 | **core-data-expert** | Core Data stack, fetches, saving/merge, migrations, CloudKit sync. |
 | **cloudkit** | CloudKit/iCloud sync (CKContainer, CKRecord, conflict handling). |
 | **ios-accessibility** | VoiceOver, Dynamic Type, focus, a11y testing. |
+| **ios-glass-ui-designer** | iOS-native glass-material UI (translucency, blur, depth). |
 | **grill-me** | Interrogate a plan/design until shared understanding. |
 | **gitnexus/** (7 sub-skills) | exploring, impact-analysis, debugging, refactoring, pr-review, cli, guide. |
 
 ## How a skill gets used in practice
 
-The project's planning discipline (`CLAUDE.md` §5) requires every plan step to name
+The global engineering discipline (`~/.claude/CLAUDE.md` §4) requires every plan step to name
 the skill(s) it relies on with a `Skill:` line — e.g.
 `Skill: core-data-expert/references/saving.md` or `Skill: none` when none applies.
 This makes skill use deliberate rather than incidental.

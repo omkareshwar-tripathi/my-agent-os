@@ -29,7 +29,7 @@ readable view of the same info; to CHANGE anything, act on the repo directly.
 ```bash
 cd <repo> && node ~/Desktop/my-agent-os/atlas/adopt.js
 ```
-Installs STATUS.md (template), the 4 standard hooks, settings wiring, and
+Installs STATUS.md (template), the 3 standard hooks, settings wiring, and
 registers the repo. It aborts (touching nothing) on invalid settings.json or
 a registry id collision — relay its message, help fix, re-run. After adopting,
 help the user fill STATUS.md's two placeholder sections from the repo's real

@@ -13,9 +13,9 @@ If a human points you at this repo and asks you to apply the setup:
     cd <the project repo>
     node <this-repo>/atlas/adopt.js
 
-That installs the per-project standard: a `STATUS.md` overview file, four
+That installs the per-project standard: a `STATUS.md` overview file, three
 hooks (status injected at session start, freshness gate at session end,
-skill reminder each prompt, simplify nudge), and their wiring in
+skill reminder each prompt), and their wiring in
 `.claude/settings.json` — validating before it writes, preserving anything
 already there. Then help the human fill STATUS.md's two placeholder sections
 from the project's real docs and history. Details: [`atlas/README.md`](atlas/README.md).
@@ -32,10 +32,10 @@ from the project's real docs and history. Details: [`atlas/README.md`](atlas/REA
 
 | Folder | What it is |
 |--------|------------|
-| [`atlas/`](atlas/) | The per-**project** standard: `STATUS.md` + 4 hooks, the one-command `adopt.js` installer, and a static dashboard generator (`node atlas/dashboard.js`) showing every repo's status and applied Claude setup. File-based — no server. |
+| [`atlas/`](atlas/) | The per-**project** standard: `STATUS.md` + 3 hooks, the one-command `adopt.js` installer, and a static dashboard generator (`node atlas/dashboard.js`) showing every repo's status and applied Claude setup. File-based — no server. |
 | [`claude-code/`](claude-code/) | The per-**machine** Claude Code setup: global settings, status line, plugins, MCP servers, skills, and the brick-by-brick build methodology docs. |
 
-The four standard hooks have ONE source of truth: `atlas/adopt/hooks/`.
+The three standard hooks have ONE source of truth: `atlas/adopt/hooks/`.
 Re-running adopt in a repo refreshes its copies.
 
 ## A note on secrets and personal data
