@@ -22,8 +22,8 @@ list_skills_in() {
     # Strip surrounding double or single quotes (YAML quoted scalars)
     desc="${desc#\"}"; desc="${desc%\"}"
     desc="${desc#\'}"; desc="${desc%\'}"
-    if [ ${#desc} -gt 140 ]; then
-      desc="${desc:0:137}..."
+    if [ ${#desc} -gt 80 ]; then
+      desc="${desc:0:77}..."
     fi
     if [ -n "$desc" ]; then
       printf -- '- %s — %s\n' "$name" "$desc"
@@ -40,9 +40,27 @@ if [ -z "$project_list" ] && [ -z "$user_list" ]; then
   exit 0
 fi
 
-ctx="Before any operation (Write/Edit/Bash/Agent/etc.), scan the skill list below. If any folder-based skill applies to the task, read its SKILL.md before acting. These are in ADDITION to any skills already listed in the system prompt."
+# Cap the emitted list at 30 skills total (project first), noting the remainder.
+MAX_SKILLS=30
+project_n=0; user_n=0
+[ -n "$project_list" ] && project_n=$(printf '%s\n' "$project_list" | wc -l | tr -d ' ')
+[ -n "$user_list" ] && user_n=$(printf '%s\n' "$user_list" | wc -l | tr -d ' ')
+more=0
+if [ $((project_n + user_n)) -gt "$MAX_SKILLS" ]; then
+  more=$((project_n + user_n - MAX_SKILLS))
+  if [ "$project_n" -ge "$MAX_SKILLS" ]; then
+    project_list=$(printf '%s\n' "$project_list" | head -n "$MAX_SKILLS")
+    user_list=""
+  else
+    user_list=$(printf '%s\n' "$user_list" | head -n $((MAX_SKILLS - project_n)))
+  fi
+fi
+
+ctx="MANDATORY: consult the coding-agent-methodology skill before any coding action (implementing, fixing, refactoring, configuring)."
+ctx+=$'\n\n'"Before any operation (Write/Edit/Bash/Agent/etc.), scan the skill list below. If any folder-based skill applies to the task, read its SKILL.md before acting. These are in ADDITION to any skills already listed in the system prompt."
 [ -n "$project_list" ] && ctx+=$'\n\nProject skills ('"$PROJECT_SKILLS_DIR"$'):\n'"$project_list"
 [ -n "$user_list" ] && ctx+=$'\n\nUser skills ('"$USER_SKILLS_DIR"$'):\n'"$user_list"
+[ "$more" -gt 0 ] && ctx+=$'\n\n…and '"$more"' more'
 
 if command -v jq >/dev/null 2>&1; then
   jq -nc --arg c "$ctx" '{hookSpecificOutput:{hookEventName:"UserPromptSubmit",additionalContext:$c}}'

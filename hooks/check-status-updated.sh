@@ -3,7 +3,8 @@
 # Blocks the stop (once) when the repo changed this turn but STATUS.md's
 # "updated" date is stale. Self-limiting: bumping the date keeps it quiet
 # for the rest of the day; the stop_hook_active guard prevents loops.
-# Installed by the agent-OS adopt script (my-agent-os/atlas/adopt.js).
+# Runs globally (wired in ~/.claude/settings.json); the no-git / no-STATUS.md
+# guards below keep it silent outside tracked projects.
 set -uo pipefail
 
 INPUT=$(cat)

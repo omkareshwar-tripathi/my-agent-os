@@ -1,24 +1,23 @@
-# STATUS — my-agent-os                                   updated 2026-07-03
+# STATUS — my-agent-os                                   updated 2026-07-12
 
 ## What this is
-The agent operating system: a per-project standard (STATUS.md + 3 session
-hooks + adopt script + static Atlas dashboard) and the per-machine Claude
-Code setup (skills, hooks, plugins), kept sanitized as the reference copy.
+My personal agent operating system, collapsed to three global Claude Code
+hooks + one mandatory methodology skill + a STATUS.md convention. Repos join
+just by having a root STATUS.md — no installer, registry, or dashboard.
 
 ## Now
-Rollout complete (2026-07-03): standard curated, all 8 registry repos adopted
-+ pushed (Remembry deliberately excluded), and ~/.claude mirrored to this
-reference. Steady state — the OS is running.
+Simplified (2026-07-12): the per-repo model (atlas adopt script, registry,
+dashboard, per-repo hook copies) is gone. Hooks now live once in ~/.claude
+and run everywhere, staying silent outside tracked projects.
 
 ## Next
+- Mirror the three hooks + methodology skill into ~/.claude on each machine
 - Keep docs in sync with the live setup
-- Optional follow-ups (personal-site .gitignore/.claude conflict, AstrologyCounsel
-  stale remote, SpeakType build artifacts, Remembry onboarding) — only on ask
 
 ## Recently done
+- 2026-07-12  collapse to 3 global hooks + mandatory methodology skill; delete atlas toolkit
 - 2026-07-03  rollout: 8 repos adopted + pushed; ~/.claude mirrored to reference
 - 2026-07-03  chore(standard): curate the agent-OS standard — global-first, clutter out
-- 2026-07-03  chore: self-adopt the agent-OS standard
 
 ## How we work here
 Claude reads this file at session start and keeps it updated at session end.

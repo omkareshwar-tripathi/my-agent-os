@@ -1,45 +1,82 @@
 # my-agent-os
 
-My agent operating system: everything needed to set up my AI-agent working
-environment lives in this one repo. Point an agent here and ask it to set
-things up — the instructions below are written for it.
+My personal agent operating system, boiled down to three things:
 
-## For agents: "set this up"
+1. **Three global hooks** that run in every Claude Code session on the machine.
+2. **One mandatory methodology skill** every coding session must consult.
+3. **A STATUS.md convention** — any repo joins the system just by having a
+   `STATUS.md` at its root.
 
-If a human points you at this repo and asks you to apply the setup:
+No installer, no per-repo copies, no registry, no dashboard. The hooks live
+once in `~/.claude` and fire everywhere; they stay silent in any directory
+that isn't a tracked project.
 
-**In a project** (the common case):
+## The three hooks
 
-    cd <the project repo>
-    node <this-repo>/atlas/adopt.js
+Source of truth: [`hooks/`](hooks/).
 
-That installs the per-project standard: a `STATUS.md` overview file, three
-hooks (status injected at session start, freshness gate at session end,
-skill reminder each prompt), and their wiring in
-`.claude/settings.json` — validating before it writes, preserving anything
-already there. Then help the human fill STATUS.md's two placeholder sections
-from the project's real docs and history. Details: [`atlas/README.md`](atlas/README.md).
+| Hook | Fires on | What it does |
+|------|----------|--------------|
+| `session-start-status.sh` | SessionStart | Injects the repo's `STATUS.md` so the session starts oriented. Silent if there's no root `STATUS.md`. |
+| `skill-reminder.sh` | UserPromptSubmit | Reminds the agent to consult the methodology skill and lists available skills (capped at 30, descriptions trimmed). |
+| `check-status-updated.sh` | Stop | Blocks the stop once if the repo changed this turn but `STATUS.md`'s date is stale. Silent outside git repos / repos without `STATUS.md`. |
 
-**On a new machine** (once):
+## The mandatory skill
 
-1. Install the atlas skill: `cp -R <this-repo>/atlas/skill ~/.claude/skills/atlas`
-2. Apply the global Claude Code config from
-   [`claude-code/artifacts/global/`](claude-code/artifacts/global/) —
-   settings, status line, global CLAUDE.md (review before copying; see
-   [`claude-code/README.md`](claude-code/README.md)).
+[`skills/coding-agent-methodology/`](skills/coding-agent-methodology/) is the
+engineering operating contract — think first, keep changes surgical, prove it
+works, don't surprise the person or the repo. The `skill-reminder` hook
+prepends a line ordering the agent to consult it before any coding action.
+
+## Install on a machine (once)
+
+```sh
+cp hooks/*.sh ~/.claude/hooks/
+cp -R skills/coding-agent-methodology ~/.claude/skills/coding-agent-methodology
+```
+
+Then add the wiring to `~/.claude/settings.json` (merge into any `hooks`
+block already there):
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      { "hooks": [ { "type": "command", "command": "bash \"$HOME/.claude/hooks/session-start-status.sh\"" } ] }
+    ],
+    "UserPromptSubmit": [
+      { "hooks": [ { "type": "command", "command": "bash \"$HOME/.claude/hooks/skill-reminder.sh\"" } ] }
+    ],
+    "Stop": [
+      { "hooks": [ { "type": "command", "command": "bash \"$HOME/.claude/hooks/check-status-updated.sh\"" } ] }
+    ]
+  }
+}
+```
+
+## Join a repo to the system
+
+Create a `STATUS.md` at the repo root:
+
+```
+# STATUS — <repo>                                   updated YYYY-MM-DD
+## What this is
+## Now
+## Next
+## Recently done
+## How we work here
+```
+
+That's it. The global hooks pick it up automatically — no per-repo setup.
 
 ## What's in here
 
 | Folder | What it is |
 |--------|------------|
-| [`atlas/`](atlas/) | The per-**project** standard: `STATUS.md` + 3 hooks, the one-command `adopt.js` installer, and a static dashboard generator (`node atlas/dashboard.js`) showing every repo's status and applied Claude setup. File-based — no server. |
-| [`claude-code/`](claude-code/) | The per-**machine** Claude Code setup: global settings, status line, plugins, MCP servers, skills, and the brick-by-brick build methodology docs. |
-
-The three standard hooks have ONE source of truth: `atlas/adopt/hooks/`.
-Re-running adopt in a repo refreshes its copies.
+| [`hooks/`](hooks/) | The three global hooks. |
+| [`skills/coding-agent-methodology/`](skills/coding-agent-methodology/) | The mandatory methodology skill. |
+| [`claude-code/`](claude-code/) | The per-machine Claude Code setup: global settings, status line, plugins, MCP servers, and the build-methodology docs. See [`claude-code/README.md`](claude-code/README.md). |
 
 ## A note on secrets and personal data
 
-Everything here is **sanitized** — no tokens, keys, or machine-specific
-paths. Personal data (the repo registry, generated dashboard, notes) lives
-only in a local `~/atlas-data/` folder, never in this repo.
+Everything here is sanitized — no tokens, keys, or machine-specific paths.
