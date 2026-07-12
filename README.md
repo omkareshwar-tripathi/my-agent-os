@@ -1,62 +1,40 @@
 # my-agent-os
 
-My personal agent operating system, boiled down to three things:
+My personal operating system for Claude Code. Install it once and every coding
+session on the machine starts with the same habits, in every project.
 
-1. **Three global hooks** that run in every Claude Code session on the machine.
-2. **One mandatory methodology skill** every coding session must consult.
-3. **A STATUS.md convention** — any repo joins the system just by having a
-   `STATUS.md` at its root.
-
-No installer, no per-repo copies, no registry, no dashboard. The hooks live
-once in `~/.claude` and fire everywhere; they stay silent in any directory
-that isn't a tracked project.
+It is a Claude Code plugin with three small parts:
 
 ## The three hooks
 
-Source of truth: [`hooks/`](hooks/).
+Little scripts that run automatically at set moments in a session:
 
-| Hook | Fires on | What it does |
-|------|----------|--------------|
-| `session-start-status.sh` | SessionStart | Injects the repo's `STATUS.md` so the session starts oriented. Silent if there's no root `STATUS.md`. |
-| `skill-reminder.sh` | UserPromptSubmit | Reminds the agent to consult the methodology skill and lists available skills (capped at 30, descriptions trimmed). |
-| `check-status-updated.sh` | Stop | Blocks the stop once if the repo changed this turn but `STATUS.md`'s date is stale. Silent outside git repos / repos without `STATUS.md`. |
+- **Session start** — shows the project's `STATUS.md` so the session begins oriented.
+- **On each message** — reminds the assistant to consult the methodology skill and lists the skills available.
+- **Session end** — nudges you to update `STATUS.md` if the project changed but the file's date is stale.
 
-## The mandatory skill
+They stay quiet in any folder that isn't a tracked project.
 
-[`skills/coding-agent-methodology/`](skills/coding-agent-methodology/) is the
-engineering operating contract — think first, keep changes surgical, prove it
-works, don't surprise the person or the repo. The `skill-reminder` hook
-prepends a line ordering the agent to consult it before any coding action.
+## The one skill
 
-## Install on a machine (once)
+`coding-agent-methodology` — the operating contract for how work gets done here:
+think first, keep changes small and surgical, prove it works, don't surprise the
+person or the repo. Once installed it is available as
+`my-agent-os:coding-agent-methodology`.
+
+## Install (two commands)
 
 ```sh
-cp hooks/*.sh ~/.claude/hooks/
-cp -R skills/coding-agent-methodology ~/.claude/skills/coding-agent-methodology
+claude plugin marketplace add omkareshwar-tripathi/my-agent-os
+claude plugin install my-agent-os@my-agent-os
 ```
 
-Then add the wiring to `~/.claude/settings.json` (merge into any `hooks`
-block already there):
-
-```json
-{
-  "hooks": {
-    "SessionStart": [
-      { "hooks": [ { "type": "command", "command": "bash \"$HOME/.claude/hooks/session-start-status.sh\"" } ] }
-    ],
-    "UserPromptSubmit": [
-      { "hooks": [ { "type": "command", "command": "bash \"$HOME/.claude/hooks/skill-reminder.sh\"" } ] }
-    ],
-    "Stop": [
-      { "hooks": [ { "type": "command", "command": "bash \"$HOME/.claude/hooks/check-status-updated.sh\"" } ] }
-    ]
-  }
-}
-```
+That's it — the three hooks and the skill now apply in every project. Updates
+pull in automatically on new commits; there is nothing to copy or re-run.
 
 ## Join a repo to the system
 
-Create a `STATUS.md` at the repo root:
+Add a `STATUS.md` at the repo root:
 
 ```
 # STATUS — <repo>                                   updated YYYY-MM-DD
@@ -67,16 +45,4 @@ Create a `STATUS.md` at the repo root:
 ## How we work here
 ```
 
-That's it. The global hooks pick it up automatically — no per-repo setup.
-
-## What's in here
-
-| Folder | What it is |
-|--------|------------|
-| [`hooks/`](hooks/) | The three global hooks. |
-| [`skills/coding-agent-methodology/`](skills/coding-agent-methodology/) | The mandatory methodology skill. |
-| [`claude-code/`](claude-code/) | The per-machine Claude Code setup: global settings, status line, plugins, MCP servers, and the build-methodology docs. See [`claude-code/README.md`](claude-code/README.md). |
-
-## A note on secrets and personal data
-
-Everything here is sanitized — no tokens, keys, or machine-specific paths.
+That's the whole opt-in. The hooks pick it up automatically.

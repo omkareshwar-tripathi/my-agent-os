@@ -1,0 +1,8 @@
+{
+  "name": "my-agent-os",
+  "description": "Personal agent-OS marketplace: STATUS.md discipline hooks + the mandatory coding-agent-methodology skill.",
+  "owner": { "name": "Omkareshwar Tripathi" },
+  "plugins": [
+    { "name": "my-agent-os", "source": "./", "description": "STATUS.md discipline hooks + mandatory coding methodology skill" }
+  ]
+}

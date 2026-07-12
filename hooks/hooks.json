@@ -1,0 +1,7 @@
+{
+  "hooks": {
+    "SessionStart": [ { "matcher": "", "hooks": [ { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/session-start-status.sh" } ] } ],
+    "UserPromptSubmit": [ { "matcher": "", "hooks": [ { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/skill-reminder.sh" } ] } ],
+    "Stop": [ { "matcher": "", "hooks": [ { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/check-status-updated.sh" } ] } ]
+  }
+}
