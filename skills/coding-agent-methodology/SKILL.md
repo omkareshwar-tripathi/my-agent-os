@@ -49,6 +49,16 @@ Minimum code that solves the problem. Nothing speculative.
 - No error handling for impossible scenarios.
 - If you write 200 lines and it could be 50, rewrite it.
 
+**The no-new-code ladder** (from the Ponytail skill). Before writing any code, walk this ladder and stop at the first rung that holds:
+
+1. Does this need to exist at all? If you believe it doesn't, **say so and let the user decide — never silently skip or drop requested work.**
+2. Already in this codebase? Reuse it.
+3. Does the standard library do it? Use that.
+4. Is there a native platform feature (e.g. `<input type="date">` instead of a custom date picker)? Use that.
+5. Does an already-installed dependency do it? Use it.
+6. Can it be one line? Write one line.
+7. Only then write the minimum new code.
+
 Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 
 ## 4. Surgical changes
@@ -86,6 +96,8 @@ For multi-step tasks, state a brief plan with a check per step:
 3. [step] → verify: [check]
 
 Then run tests / lint / type-check / build and loop until green. Strong success criteria let you loop independently; weak ones ("make it work") force constant clarification.
+
+**Ask for advice when you need it.** If the Advisor tool is enabled (Claude Code `/advisor`), consult it at decision points: before committing to a non-obvious approach, when the same error keeps recurring, and before declaring a large task complete. Weigh the advice against your own evidence — if a recommendation contradicts something you've verified, surface the conflict instead of following blindly. If no advisor is available, ask the user.
 
 ## 6. Dangerous operations — hard gates
 
@@ -132,11 +144,13 @@ Think (S1): state assumptions, surface simpler paths + interpretations, ask if u
   |
 Explore (S2): read the real code, reproduce the real behavior, map the blast radius
   |
-Simplicity (S3): minimum code, nothing speculative -- "would a senior call this overcomplicated?"
+Simplicity (S3): walk the no-new-code ladder (reuse > stdlib > native > dep > one line > minimal new code);
+                 never silently skip requested work -- flag "shouldn't exist" and let the user decide
   |
 Surgical (S4): every changed line traces to the request; match style; orphans only
   |
 Goal-driven (S5): task -> verifiable goal -> plan w/ per-step checks -> run tests/lint/build until green
+                  stuck at a fork / recurring error / big finish? -> consult the advisor (or ask the user)
   |
 Dangerous op (S6)? -> confirm first or hand off. Never auto-run. Secrets never hardcoded/printed (S7).
   |

@@ -32,6 +32,12 @@ claude plugin install my-agent-os@my-agent-os
 That's it — the three hooks and the skill now apply in every project. Updates
 pull in automatically on new commits; there is nothing to copy or re-run.
 
+**One manual step:** the methodology skill tells the agent to consult the
+Advisor tool at decision points, but installing this plugin does not enable
+it — Advisor is a per-machine Claude Code setting. Turn it on yourself with
+`/advisor <model>` in a session, `claude --advisor <model>` at launch, or the
+`advisorModel` setting. Without it, the agent falls back to asking you.
+
 ## Join a repo to the system
 
 Add a `STATUS.md` at the repo root:
